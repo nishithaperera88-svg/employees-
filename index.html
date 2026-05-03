@@ -1,458 +1,245 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workshop Manager - Supabase Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Workshop Manager Pro</title>
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --primary: #3b82f6; --green: #22c55e; --red: #ef4444; --orange: #f97316; --yellow: #eab308; }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Noto Sans Sinhala', sans-serif; background: var(--bg); color: var(--text); padding: 15px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .auth-box { max-width: 400px; margin: 100px auto; background: var(--card); padding: 30px; border-radius: 15px; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .sync-status { font-size: 12px; color: #94a3b8; }
-        .sync-status.online { color: var(--green); }
-        .sync-status.offline { color: var(--red); }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .dash-card { background: var(--card); padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid var(--primary); }
-        .dash-card.green { border-color: var(--green); }
-        .dash-card.yellow { border-color: var(--yellow); }
-        .dash-card p { font-size: 24px; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media (min-width: 850px) {.grid { grid-template-columns: 380px 1fr; } }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h2 { font-size: 18px; margin-bottom: 15px; color: var(--primary); }
-        label { display: block; margin: 10px 0 5px; font-size: 12px; color: #94a3b8; }
-        input, textarea, button { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #334155; background: #0f172a; color: #fff; font-family: inherit; }
-        button { cursor: pointer; font-weight: bold; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        .emp-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: #161e2e; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid transparent; cursor: pointer; }
-        .emp-item:hover { background: #1e293b; }
-        .emp-item.is-in { border-left-color: var(--green); }
-        .emp-item.is-out { border-left-color: var(--red); }
-        .emp-item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; background: #334155; }
-        .status-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
-        .status-in { background: rgba(34, 197, 94, 0.2); color: var(--green); }
-        .status-out { background: rgba(239, 68, 68, 0.2); color: var(--red); }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
-        .modal-content { background: var(--card); margin: 3% auto; padding: 25px; border-radius: 20px; width: 90%; max-width: 650px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #334155; }
-        th { color: var(--primary); }
-        .btn-primary { background: var(--primary); border: none; }
-        .btn-green { background: var(--green); border: none; }
-        .btn-red { background: var(--red); border: none; }
-        .btn-orange { background: var(--orange); border: none; }
-        .btn-sync { background: var(--yellow); color: #000; border: none; width: auto; padding: 10px 20px; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--green); color: #fff; padding: 15px 20px; border-radius: 10px; display: none; z-index: 2000; }
-        .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #fff; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
         .hidden { display: none !important; }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-box {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .login-box h1 {
+            color: #3b82f6;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #e2e8f0;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #059669;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideIn 0.3s;
+        }
+        .toast.success { background: #10b981; }
+        .toast.error { background: #ef4444; }
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+        .app-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 12px;
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-online {
+            background: #10b981;
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <div id="authScreen" class="auth-box">
-        <h2 style="text-align:center; margin-bottom:20px;">Workshop Manager Login</h2>
-        <label>Email</label>
-        <input type="email" id="authEmail" placeholder="you@example.com">
-        <label>Password</label>
-        <input type="password" id="authPassword" placeholder="••••••••">
-        <button class="btn-primary" style="margin-top:15px" onclick="login()">Login</button>
-        <button class="btn-green" style="margin-top:10px" onclick="signup()">Sign Up</button>
-        <p style="text-align:center; margin-top:15px; font-size:12px; color:#64748b">Free account එකක් හදලා use කරන්න</p>
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h1>Workshop Manager Login</h1>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="authEmail" placeholder="you@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="authPassword" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary" id="loginBtn">Login</button>
+            <button class="btn btn-success" id="signupBtn">Sign Up</button>
+            <p style="text-align: center; margin-top: 20px; color: #64748b; font-size: 14px;">
+                Free account එකක් හදලා use කරන්න
+            </p>
+        </div>
     </div>
 
-    <div id="mainApp" class="container hidden">
-        <div class="header-bar">
-            <h1 style="color:var(--primary)">Workshop Manager Pro</h1>
+    <div id="appScreen" class="app-container hidden">
+        <div class="header">
+            <h1>Workshop Manager Pro</h1>
             <div>
-                <span id="userEmail" style="margin-right:10px; font-size:12px;"></span>
-                <button class="btn-red" style="width:auto; padding:8px 15px" onclick="logout()">Logout</button>
-                <div class="sync-status" id="syncStatus">Checking...</div>
+                <span class="status-badge status-online">Online - Real-time</span>
+                <button class="btn btn-primary" id="logoutBtn" style="width: auto; margin-left: 10px; padding: 8px 16px;">Logout</button>
             </div>
-        </div>
-        <div class="dashboard">
-            <div class="dash-card"><h3>මුළු සේවකයෝ</h3><p id="dashCount">0</p></div>
-            <div class="dash-card green"><h3>ගෙවීමට ඇති එකතුව</h3><p id="dashTotalPay">Rs. 0</p></div>
-            <div class="dash-card yellow"><h3>මේ මාසේ වැඩ දවස්</h3><p id="dashMonthDays">0</p></div>
-        </div>
-        <div class="grid">
-            <div class="sidebar">
-                <div class="card">
-                    <h2>අලුත් සේවකයෙක් ඇතුළත් කරන්න</h2>
-                    <label>සේවක ඡායාරූපය</label>
-                    <input type="file" id="empPhoto" accept="image/*">
-                    <input type="text" id="empName" placeholder="නම (Name)">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                        <div><input type="text" id="empCustomId" placeholder="Employee ID"></div>
-                        <div><input type="text" id="empNIC" placeholder="NIC අංකය"></div>
-                    </div>
-                    <input type="text" id="empPhone" placeholder="දුරකථන අංකය">
-                    <textarea id="empAddress" placeholder="ලිපිනය (Address)" style="height:70px"></textarea>
-                    <input type="number" id="empRate" placeholder="පැයකට ගාස්තුව (Hourly Rate)">
-                    <button class="btn-primary" style="margin-top:15px" onclick="addEmployee()">Register</button>
-                </div>
-                <div class="card">
-                    <h2>පැමිණීම සටහන් කරන්න</h2>
-                    <input type="text" id="clockSearch" placeholder="ID හෝ NIC අංකය..." onkeypress="if(event.key==='Enter') clockIn()">
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <button class="btn-green" onclick="clockIn()">In</button>
-                        <button class="btn-red" onclick="clockOut()">Out</button>
-                    </div>
-                </div>
-            <div class="main-content">
-                <div class="card">
-                    <div style="display:flex; gap:10px; margin-bottom:15px;">
-                        <input type="text" id="mainSearch" placeholder="ID, NIC හෝ නම මගින් සෙවීම..." oninput="renderEmployees()" style="flex:1">
-                        <button class="btn-primary" style="width:auto; padding:0 20px" onclick="loadEmployees()">🔄 Refresh</button>
-                    </div>
-                    <div id="employeeList"></div>
-                </div>
-            </div>
-        </div>
-    <div id="detailsModal" class="modal">
-        <div class="modal-content">
-            <span style="float:right; cursor:pointer; font-size:30px;" onclick="closeModal()">&times;</span>
-            <div id="modalBody"></div>
+        <div id="employeeList">
+            <h2 style="margin-bottom: 20px;">සේවකයින්</h2>
+            <p id="noEmployees" style="color: #64748b;">No employees yet. Add one to start!</p>
         </div>
     </div>
-    <div id="toast" class="toast"></div>
 
-<script>
-    const SUPABASE_URL = 'https://usgnfoytwamwkxmrxjl.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_RJLCIyDwOmdImbyVpjy3rg_cj49EnEk';
-    
-    const MASTER_PASS = "1234";
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    let employees = [];
-    let currentUser = null;
-    let isOnline = navigator.onLine;
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // මෙන්න හරිම URL සහ KEY එක
+        const SUPABASE_URL = 'https://usgnfoytwamwkxmrxjl.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_RJLCIyDwOmdImbyVpjy3rg_cj49EnEk';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    db.auth.onAuthStateChange((event, session) => {
-        if (session) {
-            currentUser = session.user;
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('userEmail').textContent = currentUser.email;
-            init();
-        } else {
-            currentUser = null;
-            document.getElementById('authScreen').classList.remove('hidden');
-            document.getElementById('mainApp').classList.add('hidden');
+        const loginScreen = document.getElementById('loginScreen');
+        const appScreen = document.getElementById('appScreen');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
-    });
 
-    async function login() {
-        const email = document.getElementById('authEmail').value;
-        const password = document.getElementById('authPassword').value;
-        const { error } = await db.auth.signInWithPassword({ email, password });
-        if (error) showToast(error.message, true);
-    }
-
-    async function signup() {
-        const email = document.getElementById('authEmail').value;
-        const password = document.getElementById('authPassword').value;
-        const { error } = await db.auth.signUp({ email, password });
-        if (error) showToast(error.message, true);
-        else showToast('Account හදලා! Email verify ඕන නෑ. Login වෙන්න');
-    }
-
-    async function logout() {
-        await db.auth.signOut();
-    }
-
-    db.channel('employees').on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, () => {
-        loadEmployees();
-    }).subscribe();
-
-    async function init() {
-        updateSyncStatus();
-        await loadEmployees();
-    }
-
-    window.addEventListener('online', () => { isOnline = true; updateSyncStatus(); });
-    window.addEventListener('offline', () => { isOnline = false; updateSyncStatus(); });
-
-    function updateSyncStatus() {
-        const el = document.getElementById('syncStatus');
-        el.className = 'sync-status ' + (isOnline ? 'online' : 'offline');
-        el.textContent = isOnline ? 'Online - Real-time' : 'Offline';
-    }
-
-    function showToast(msg, isError = false) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.style.background = isError ? 'var(--red)' : 'var(--green)';
-        t.style.display = 'block';
-        setTimeout(() => t.style.display = 'none', 3000);
-    }
-
-    function formatDate(isoString) {
-        return new Date(isoString).toLocaleString('en-GB', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit'
-        });
-    }
-
-    function getMonthWorkDays(emp) {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        const uniqueDays = new Set();
-        (emp.workLogs || []).forEach(log => {
-            const logDate = new Date(log.in);
-            if(logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                uniqueDays.add(logDate.toDateString());
+        signupBtn.addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            
+            if (!email || !password) {
+                showToast('Email සහ Password දෙන්න', 'error');
+                return;
             }
-        });
-        return uniqueDays.size;
-    }
 
-    async function loadEmployees() {
-        const { data, error } = await db.from('employees').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false });
-        if (error) return showToast(error.message, true);
-        employees = data || [];
-        renderEmployees();
-        updateDashboard();
-    }
-
-    async function uploadPhoto(file) {
-        if (!file) return null;
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${currentUser.id}/${Date.now()}.${fileExt}`;
-        const { error } = await db.storage.from('photos').upload(fileName, file);
-        if (error) throw error;
-        const { data } = db.storage.from('photos').getPublicUrl(fileName);
-        return data.publicUrl;
-    }
-
-    async function addEmployee() {
-        const name = document.getElementById('empName').value.trim();
-        const cid = document.getElementById('empCustomId').value.trim();
-        const nic = document.getElementById('empNIC').value.trim();
-        const phone = document.getElementById('empPhone').value.trim();
-        const addr = document.getElementById('empAddress').value.trim();
-        const rate = document.getElementById('empRate').value;
-        const photoFile = document.getElementById('empPhoto').files[0];
-
-        if(!name || !cid || !nic || !rate) return showToast("නම, ID, NIC සහ Rate අනිවාර්යයි!", true);
-
-        try {
-            const photoUrl = photoFile ? await uploadPhoto(photoFile) : null;
-            const { error } = await db.from('employees').insert({
-                id: Date.now().toString(),
-                name, customId: cid, nic, phone, address: addr,
-                rate: parseFloat(rate), photo: photoUrl, user_id: currentUser.id
+            if (password.length < 6) {
+                showToast('Password එක අඩුම characters 6ක් වෙන්න ඕන', 'error');
+                return;
+            }
+            
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
             });
-            if (error) throw error;
-            showToast("සේවකයා සාර්ථකව ඇතුළත් කළා!");
-            document.querySelectorAll('.sidebar input,.sidebar textarea').forEach(el => el.value = '');
-        } catch (e) {
-            showToast(e.message, true);
-        }
-    }
-
-    function renderEmployees() {
-        const list = document.getElementById('employeeList');
-        const q = document.getElementById('mainSearch').value.toLowerCase();
-        list.innerHTML = "";
-        const filtered = employees.filter(e =>
-            e.name.toLowerCase().includes(q) ||
-            e.customId.toLowerCase().includes(q) ||
-            e.nic.toLowerCase().includes(q)
-        );
-        if(filtered.length === 0) {
-            list.innerHTML = '<p style="text-align:center; color:#64748b">සේවකයෙක් හමු නොවීය</p>';
-            return;
-        }
-        filtered.forEach(emp => {
-            const monthDays = getMonthWorkDays(emp);
-            const div = document.createElement('div');
-            div.className = `emp-item ${emp.isClockedIn ? 'is-in' : 'is-out'}`;
-            div.onclick = () => showDetails(emp.id);
-            div.innerHTML = `
-                <img src="${emp.photo || 'https://i.imgur.com/6VBx3io.png'}">
-                <div style="flex:1">
-                    <b>${emp.name}</b> <span class="status-badge ${emp.isClockedIn ? 'status-in' : 'status-out'}">${emp.isClockedIn ? 'IN' : 'OUT'}</span>
-                    <br><small style="color:#94a3b8">ID: ${emp.customId} | NIC: ${emp.nic} | මාසේ: දින ${monthDays}</small>
-                </div>
-                <button class="btn-primary" style="width:auto; padding:8px 15px" onclick="event.stopPropagation(); showDetails('${emp.id}')">විස්තර</button>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    function findEmployee(query) {
-        const q = query.trim().toLowerCase();
-        return employees.find(e => e.customId.toLowerCase() === q || e.nic.toLowerCase() === q);
-    }
-
-    async function clockIn() {
-        const q = document.getElementById('clockSearch').value.trim();
-        if(!q) return showToast("ID හෝ NIC අංකය ඇතුළත් කරන්න!", true);
-        const emp = findEmployee(q);
-        if(!emp) return showToast("සේවකයා හමුවුනේ නැත!", true);
-        if(emp.isClockedIn) return showToast("සේවකයා දැනටමත් IN වී ඇත!", true);
-        const { error } = await db.from('employees').update({
-            isClockedIn: true,
-            lastIn: new Date().toISOString()
-        }).eq('id', emp.id);
-        if (error) return showToast(error.message, true);
-        document.getElementById('clockSearch').value = "";
-        showToast(`${emp.name} IN වුණා`);
-    }
-
-    async function clockOut() {
-        const q = document.getElementById('clockSearch').value.trim();
-        if(!q) return showToast("ID හෝ NIC අංකය ඇතුළත් කරන්න!", true);
-        const emp = findEmployee(q);
-        if(!emp) return showToast("සේවකයා හමුවුනේ නැත!", true);
-        if(!emp.isClockedIn) return showToast("සේවකයා IN වී නැත!", true);
-        const hours = (new Date() - new Date(emp.lastIn)) / 3600000;
-        const amount = hours * emp.rate;
-        const workLog = {
-            in: emp.lastIn,
-            out: new Date().toISOString(),
-            hrs: hours.toFixed(2),
-            amount: amount.toFixed(2)
-        };
-        const { error } = await db.from('employees').update({
-            isClockedIn: false,
-            workLogs: [...(emp.workLogs || []), workLog]
-        }).eq('id', emp.id);
-        if (error) return showToast(error.message, true);
-        document.getElementById('clockSearch').value = "";
-        showToast(`${emp.name} Out වුණා. කාලය: ${hours.toFixed(2)} hrs`);
-    }
-
-    function showDetails(id) {
-        const emp = employees.find(e => e.id === id);
-        const workedAmt = (emp.workLogs || []).reduce((s, l) => s + parseFloat(l.amount), 0);
-        const paidAmt = (emp.payments || []).reduce((s, p) => s + parseFloat(p.amount), 0);
-        const balance = (workedAmt + emp.incentive) - (paidAmt + emp.advance);
-        const monthDays = getMonthWorkDays(emp);
-        const totalHours = (emp.workLogs || []).reduce((s, l) => s + parseFloat(l.hrs), 0);
-        let paymentTable = '';
-        if(emp.payments && emp.payments.length > 0) {
-            paymentTable = `
-                <h3 style="margin-top:20px; font-size:14px; color:var(--green)">ගෙවීම් ඉතිහාසය</h3>
-                <table>
-                    <tr><th>දිනය</th><th>මුදල</th></tr>
-                    ${emp.payments.slice().reverse().map(p => `
-                        <tr><td>${formatDate(p.date)}</td><td>Rs. ${parseFloat(p.amount).toFixed(2)}</td></tr>
-                    `).join('')}
-                </table>
-            `;
-        }
-        document.getElementById('modalBody').innerHTML = `
-            <div style="text-align:center">
-                <img src="${emp.photo || 'https://i.imgur.com/6VBx3io.png'}" style="width:110px; height:110px; border-radius:50%; border:3px solid var(--primary)">
-            </div>
-            <h2 style="text-align:center; margin:10px 0;">${emp.name}</h2>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <div><label>Employee ID</label><input value="${emp.customId}" disabled></div>
-                <div><label>NIC අංකය</label><input id="uNIC" value="${emp.nic}"></div>
-            </div>
-            <div><label>පැයකට ගාස්තුව</label><input id="uRate" type="number" value="${emp.rate}"></div>
-            <label>Phone Number</label><input id="uPhone" value="${emp.phone || ''}">
-            <label>Address</label><input id="uAddr" value="${emp.address || ''}">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; background:rgba(255,255,255,0.05); padding:10px; border-radius:10px;">
-                <div><label>Advance</label><input type="number" id="uAdv" value="${emp.advance}"></div>
-                <div><label>Incentive</label><input type="number" id="uInc" value="${emp.incentive}"></div>
-                <div><label>මේ මාසේ දවස්</label><input value="${monthDays}" disabled></div>
-            </div>
-            <div style="margin-top:15px; padding:15px; background: #0f172a; border-radius:12px; border:1px solid var(--green)">
-                <div style="display:flex; justify-content:space-between"><span>මුළු වැඩ පැය:</span> <b>${totalHours.toFixed(2)} hrs</b></div>
-                <div style="display:flex; justify-content:space-between; margin-top:5px"><span>උපයා ඇති මුළු මුදල:</span> <b>Rs. ${workedAmt.toFixed(2)}</b></div>
-                <div style="display:flex; justify-content:space-between; margin-top:5px"><span>ගෙවා ඇති මුළු මුදල:</span> <b>Rs. ${paidAmt.toFixed(2)}</b></div>
-                <div style="display:flex; justify-content:space-between; margin-top:8px; color:var(--green); font-size:18px; border-top:1px solid #334155; padding-top:8px;">
-                    <span>දැනට ගෙවිය යුතු ශේෂය:</span> <b>Rs. ${balance.toFixed(2)}</b>
-                </div>
-            ${paymentTable}
-            <button class="btn-orange" style="margin-top:15px" onclick="updateEmp('${emp.id}', ${balance})">Update</button>
-            <button class="btn-green" style="margin-top:10px" onclick="paySalary('${emp.id}', ${balance})">වැටුප් ගෙවා අවසන් කරන්න</button>
-            <button class="btn-red" style="margin-top:10px; background:none; border:1px solid var(--red); color:var(--red)" onclick="deleteEmp('${emp.id}')">සේවකයා ඉවත් කරන්න</button>
-        `;
-        document.getElementById('detailsModal').style.display = "block";
-    }
-
-    async function updateEmp(id, currentBal) {
-        const emp = employees.find(e => e.id === id);
-        const { error } = await db.from('employees').update({
-            nic: document.getElementById('uNIC').value.trim(),
-            phone: document.getElementById('uPhone').value,
-            address: document.getElementById('uAddr').value,
-            rate: parseFloat(document.getElementById('uRate').value),
-            advance: parseFloat(document.getElementById('uAdv').value),
-            incentive: parseFloat(document.getElementById('uInc').value)
-        }).eq('id', id);
-        if (error) return showToast(error.message, true);
-        showToast("විස්තර Update කළා!");
-        closeModal();
-    }
-
-    async function paySalary(id, bal) {
-        if(bal <= 0) return showToast("ගෙවීමට මුදලක් නැත!", true);
-        if(prompt("Confirm Password:") === MASTER_PASS) {
-            const emp = employees.find(e => e.id === id);
-            const payment = { date: new Date().toISOString(), amount: bal };
-            const { error } = await db.from('employees').update({
-                payments: [...(emp.payments || []), payment],
-                advance: 0,
-                incentive: 0
-            }).eq('id', id);
-            if (error) return showToast(error.message, true);
-            closeModal();
-            showToast("ගෙවීම සාර්ථකයි! Rs. " + bal.toFixed(2));
-        } else {
-            showToast("Password වැරදියි!", true);
-        }
-    }
-
-    async function deleteEmp(id) {
-        if(confirm("මෙම සේවකයාව ඉවත් කිරීමට ඔබට සහතිකද?")) {
-            if(prompt("Admin Password:") === MASTER_PASS) {
-                const { error } = await db.from('employees').delete().eq('id', id);
-                if (error) return showToast(error.message, true);
-                closeModal();
-                showToast("සේවකයා ඉවත් කළා");
+            
+            if (error) {
+                showToast(error.message, 'error');
             } else {
-                showToast("Password වැරදියි!", true);
+                showToast('Account හදලා! දැන් Login වෙන්න', 'success');
+                document.getElementById('authPassword').value = '';
             }
-        }
-    }
-
-    function updateDashboard() {
-        let totalNet = 0;
-        let totalMonthDays = 0;
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-        employees.forEach(e => {
-            const worked = (e.workLogs || []).reduce((s, l) => s + parseFloat(l.amount), 0);
-            const paid = (e.payments || []).reduce((s, p) => s + parseFloat(p.amount), 0);
-            totalNet += (worked + e.incentive) - (paid + e.advance);
-            const uniqueDays = new Set();
-            (e.workLogs || []).forEach(log => {
-                const logDate = new Date(log.in);
-                if(logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                    uniqueDays.add(logDate.toDateString());
-                }
-            });
-            totalMonthDays += uniqueDays.size;
         });
-        document.getElementById('dashCount').textContent = employees.length;
-        document.getElementById('dashTotalPay').textContent = "Rs. " + Math.max(0, totalNet).toLocaleString();
-        document.getElementById('dashMonthDays').textContent = totalMonthDays;
-    }
 
-    function closeModal() { document.getElementById('detailsModal').style.display = "none"; }
-    window.onclick = (e) => { if(e.target.className === 'modal') closeModal(); }
-</script>
+        loginBtn.addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value;
+            const password = document.getElementById('authPassword').value;
+            
+            if (!email || !password) {
+                showToast('Email සහ Password දෙන්න', 'error');
+                return;
+            }
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+            
+            if (error) {
+                showToast(error.message, 'error');
+            } else {
+                showToast('Login වුනා!', 'success');
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            showToast('Logout වුනා', 'success');
+        });
+
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+            } else {
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+    </script>
 </body>
 </html>
