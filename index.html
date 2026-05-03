@@ -3,302 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Workshop Manager Pro</title>
+    <title>Workshop Manager Pro | Professional Records</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #0f172a; --card-bg: #1e293b; --primary: #3b82f6;
+            --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
+            --text-main: #f1f5f9; --text-dim: #94a3b8;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0f172a;
-            color: #e2e8f0;
-            min-height: 100vh;
-            padding: 20px;
-        }
-       .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-       .header {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-       .header h1 {
-            color: #3b82f6;
-            font-size: 24px;
-        }
-       .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            background: #10b981;
-            color: white;
-        }
-       .card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-       .card h2 {
-            color: #3b82f6;
-            margin-bottom: 20px;
-            font-size: 20px;
-        }
-       .form-group {
-            margin-bottom: 15px;
-        }
-       .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-            font-size: 14px;
-        }
-       .form-group input {
-            width: 100%;
-            padding: 12px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: #e2e8f0;
-            font-size: 16px;
-        }
-       .form-group input:focus {
-            outline: none;
-            border-color: #3b82f6;
-        }
-       .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-       .btn-success {
-            background: #10b981;
-            color: white;
-            width: 100%;
-        }
-       .btn-success:hover {
-            background: #059669;
-        }
-       .btn-danger {
-            background: #ef4444;
-            color: white;
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-       .btn-danger:hover {
-            background: #dc2626;
-        }
-       .employee-item {
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-        }
-       .employee-info h3 {
-            color: #e2e8f0;
-            margin-bottom: 5px;
-            font-size: 18px;
-        }
-       .employee-info p {
-            color: #94a3b8;
-            font-size: 14px;
-        }
-       .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            animation: slideIn 0.3s;
-        }
-       .toast.success { background: #10b981; }
-       .toast.error { background: #ef4444; }
-        @keyframes slideIn {
-            from { transform: translateX(400px); }
-            to { transform: translateX(0); }
-        }
-       .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-       .stat-card {
-            background: #1e293b;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-       .stat-card h3 {
-            color: #64748b;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-       .stat-card p {
-            color: #3b82f6;
-            font-size: 32px;
-            font-weight: 700;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text-main); padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 25px; border-radius: 20px; margin-bottom: 25px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); }
+
+        .tabs { display: flex; gap: 8px; background: #1e293b; padding: 8px; border-radius: 12px; margin-bottom: 25px; }
+        .tab { flex: 1; padding: 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; font-weight: 700; border-radius: 10px; transition: 0.3s; }
+        .tab.active { background: var(--primary); color: white; }
+
+        .card { background: var(--card-bg); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+        .form-group input, .form-group textarea { width: 100%; padding: 12px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-family: inherit; margin-top: 5px; }
+
+        .employee-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; }
+        .employee-card { background: var(--card-bg); padding: 20px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: black; }
+        
+        /* New Delete Button style for card footer */
+        .delete-icon-btn { margin-top: 15px; width: 100%; background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .delete-icon-btn:hover { background: var(--danger); color: white; }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; }
+        .modal.active { display: flex; }
+        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 900px; max-height: 90vh; overflow-y: auto; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #334155; }
+        th { color: var(--text-dim); text-transform: uppercase; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .history-section { margin-top: 25px; padding-top: 20px; border-top: 2px dashed #334155; }
+        
+        .modal-photo { width: 150px; height: 150px; border-radius: 75px; object-fit: cover; margin: 0 auto 20px auto; display: block; border: 4px solid var(--primary); }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <div class="header">
-            <h1>Workshop Manager Pro</h1>
-            <span class="status-badge">Offline Mode - Auto Save</span>
+        <div class="header"><h1>⚡ Workshop Manager Pro</h1></div>
+
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-label">සේවකයින්</div><div class="stat-value" id="statTotal">0</div></div>
+            <div class="stat-card"><div class="stat-label">වැඩ කරන</div><div class="stat-value" id="statWorking" style="color: var(--success);">0</div></div>
+            <div class="stat-card"><div class="stat-label">ගෙවීමට ඇති මුළු මුදල</div><div class="stat-value" id="statPending" style="color: var(--warning);">Rs. 0</div></div>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <h3>මුළු සේවකයින්</h3>
-                <p id="totalEmployees">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>මුළු Salary</h3>
-                <p id="totalSalary">Rs. 0</p>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(event, 'listTab')">📋 සේවකයින් & ගෙවීම්</button>
+            <button class="tab" onclick="switchTab(event, 'addTab')">➕ අලුත් සේවකයෙක්</button>
+        </div>
+
+        <div id="addTab" class="tab-content">
+            <div class="card">
+                <div class="form-grid">
+                    <div class="form-group"><label>නම</label><input type="text" id="eName"></div>
+                    <div class="form-group"><label>Work ID</label><input type="text" id="eId"></div>
+                    <div class="form-group"><label>NIC</label><input type="text" id="eNIC"></div>
+                    <div class="form-group"><label>පැයකට ගෙවීම</label><input type="number" id="eRate"></div>
+                    <div class="form-group"><label>ලිපිනය</label><textarea id="eAddress"></textarea></div>
+                    <div class="form-group"><label>බැංකු විස්තර</label><textarea id="eBank"></textarea></div>
+                    <div class="form-group"><label>ඡායාරූපය</label><input type="file" id="ePhoto" accept="image/*"></div>
+                </div>
+                <button class="btn btn-success" style="width:100%; margin-top:20px;" onclick="addEmployee()">Save Employee</button>
             </div>
         </div>
 
-        <div class="card">
-            <h2>නව සේවකයෙක් එකතු කරන්න</h2>
-            <div class="form-group">
-                <label>සේවකයාගේ නම</label>
-                <input type="text" id="empName" placeholder="උදා: Nimal Perera">
-            </div>
-            <div class="form-group">
-                <label>Basic Salary (Rs.)</label>
-                <input type="number" id="empSalary" placeholder="උදා: 50000">
-            </div>
-            <div class="form-group">
-                <label>Phone Number (Optional)</label>
-                <input type="text" id="empPhone" placeholder="උදා: 0771234567">
-            </div>
-            <button class="btn btn-success" id="addEmpBtn">+ Add Employee</button>
+        <div id="listTab" class="tab-content active">
+            <input type="text" id="search" placeholder="🔍 සොයන්න (Name/ID/NIC)..." style="width:100%; padding:15px; border-radius:12px; background:var(--card-bg); border:1px solid var(--primary); color:white; margin-bottom:20px;" oninput="render()">
+            <div id="empList" class="employee-grid"></div>
         </div>
+    </div>
 
-        <div class="card">
-            <h2>සේවක ලැයිස්තුව <span id="empCount" style="color: #64748b; font-size: 16px;"></span></h2>
-            <div id="employeeList">
-                <p style="color: #64748b; text-align: center; padding: 40px 0;">තවම සේවකයින් නෑ. උඩින් Add කරන්න.</p>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+                <h2 id="mTitle"></h2>
+                <button class="btn btn-danger" onclick="closeModal()">Close</button>
+            </div>
+            <div id="mPhotoContainer"></div>
+            <div class="history-section">
+                <h3>📅 වැඩ කළ ඉතිහාසය (Work Logs)</h3>
+                <table id="workTable">
+                    <thead><tr><th>දිනය</th><th>පැය</th><th>මුදල</th></tr></thead>
+                    <tbody id="workBody"></tbody>
+                </table>
+            </div>
+            <div class="history-section" style="background: rgba(16, 185, 129, 0.05); padding: 15px; border-radius: 12px;">
+                <h3>💰 ගෙවීම් ඉතිහාසය (Payment History)</h3>
+                <table id="payTable">
+                    <thead><tr><th>ගෙවූ දිනය</th><th>මුදල</th><th>තත්ත්වය</th></tr></thead>
+                    <tbody id="payBody"></tbody>
+                </table>
+            </div>
+            <div style="margin-top:25px; background:var(--bg); padding:20px; border-radius:15px; border:1px solid var(--warning);">
+                <h3 style="color:var(--warning)">ගෙවීමට ඇති මුදල: Rs. <span id="mPending">0</span></h3>
+                <button class="btn btn-warning" style="width:100%; margin-top:15px; font-size:16px;" id="payoutBtn">මුදල් ගෙවා අවසන් කරන්න (Confirm Payout)</button>
             </div>
         </div>
     </div>
 
     <script>
-        const EMPLOYEES_KEY = 'workshop_employees_noauth';
+        let emps = JSON.parse(localStorage.getItem('workshop_pro_v7') || '[]');
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        function getEmployees() {
-            return JSON.parse(localStorage.getItem(EMPLOYEES_KEY) || '[]');
-        }
-
-        function saveEmployees(employees) {
-            localStorage.setItem(EMPLOYEES_KEY, JSON.stringify(employees));
+        function save() {
+            localStorage.setItem('workshop_pro_v7', JSON.stringify(emps));
+            render();
             updateStats();
+        }
+
+        function switchTab(e, id) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function addEmployee() {
+            const name = document.getElementById('eName').value;
+            const id = document.getElementById('eId').value;
+            const nic = document.getElementById('eNIC').value;
+            const rate = document.getElementById('eRate').value;
+            if(!name || !id || !rate) return alert("Fill required fields!");
+
+            const photoFile = document.getElementById('ePhoto').files[0];
+            const reader = new FileReader();
+
+            reader.onloadend = function() {
+                emps.push({
+                    name, id, nic, rate: parseFloat(rate),
+                    address: document.getElementById('eAddress').value,
+                    bank: document.getElementById('eBank').value,
+                    photo: reader.result || null,
+                    clockIn: null, pendingPay: 0,
+                    workLogs: [], payLogs: []
+                });
+                save();
+                // Clear form
+                document.getElementById('eName').value = '';
+                document.getElementById('eId').value = '';
+                document.getElementById('eRate').value = '';
+                alert("Employee Saved!");
+            }
+
+            if (photoFile) {
+                reader.readAsDataURL(photoFile);
+            } else {
+                reader.onloadend();
+            }
+        }
+
+        function deleteEmployee(idx) {
+            if(confirm(`මෙම සේවකයාගේ ( ${emps[idx].name} ) සියලුම දත්ත මකා දැමීමට ඔබට සහතිකද?`)) {
+                emps.splice(idx, 1);
+                save();
+            }
+        }
+
+        function clockToggle(idx) {
+            const e = emps[idx];
+            if(!e.clockIn) {
+                e.clockIn = new Date().toISOString();
+            } else {
+                const hours = (new Date() - new Date(e.clockIn)) / (1000 * 60 * 60);
+                const earned = hours * e.rate;
+                e.workLogs.push({ date: new Date().toLocaleString(), hours: hours.toFixed(2), earned: earned.toFixed(2) });
+                e.pendingPay += earned;
+                e.clockIn = null;
+            }
+            save();
+        }
+
+        function doPayout(idx) {
+            const e = emps[idx];
+            if(e.pendingPay <= 0) return alert("No pending amount!");
+            if(confirm(`Rs. ${e.pendingPay.toFixed(2)} ගෙවා අවසන් බව සහතිකද?`)) {
+                e.payLogs.push({ date: new Date().toLocaleString(), amount: e.pendingPay.toFixed(2) });
+                e.pendingPay = 0;
+                save();
+                showDetails(idx);
+            }
+        }
+
+        function render() {
+            const list = document.getElementById('empList');
+            const search = document.getElementById('search').value.toLowerCase();
+            list.innerHTML = '';
+
+            emps.forEach((e, i) => {
+                if(e.name.toLowerCase().includes(search) || e.id.includes(search) || e.nic.includes(search)) {
+                    list.innerHTML += `
+                        <div class="employee-card">
+                            <h3>${e.name}</h3>
+                            <p style="font-size:12px; color:var(--text-dim)">ID: ${e.id} | NIC: ${e.nic}</p>
+                            <h4 style="color:var(--warning); margin:10px 0;">Pending: Rs. ${e.pendingPay.toFixed(2)}</h4>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                                <button class="btn btn-primary" onclick="showDetails(${i})">Details / History</button>
+                                <button class="btn ${e.clockIn ? 'btn-danger' : 'btn-success'}" onclick="clockToggle(${i})">
+                                    ${e.clockIn ? 'Stop' : 'Start'}
+                                </button>
+                            </div>
+                            <button class="btn delete-icon-btn" onclick="deleteEmployee(${i})">🗑️ සේවකයා ඉවත් කරන්න (Delete)</button>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function showDetails(i) {
+            const e = emps[i];
+            document.getElementById('mTitle').textContent = e.name + " - Records";
+            document.getElementById('mPending').textContent = e.pendingPay.toFixed(2);
+            if (e.photo) {
+                document.getElementById('mPhotoContainer').innerHTML = `<img src="${e.photo}" class="modal-photo" alt="${e.name}'s photo">`;
+            } else {
+                document.getElementById('mPhotoContainer').innerHTML = '';
+            }
+            document.getElementById('workBody').innerHTML = e.workLogs.map(l => `
+                <tr><td>${l.date}</td><td>${l.hours}h</td><td>Rs. ${l.earned}</td></tr>
+            `).reverse().join('');
+            document.getElementById('payBody').innerHTML = e.payLogs.map(l => `
+                <tr><td>${l.date}</td><td>Rs. ${l.amount}</td><td style="color:var(--success)">PAID ✅</td></tr>
+            `).reverse().join('');
+            document.getElementById('payoutBtn').onclick = () => doPayout(i);
+            document.getElementById('modal').classList.add('active');
         }
 
         function updateStats() {
-            const employees = getEmployees();
-            const totalSalary = employees.reduce((sum, emp) => sum + emp.salary, 0);
-
-            document.getElementById('totalEmployees').textContent = employees.length;
-            document.getElementById('totalSalary').textContent = 'Rs. ' + totalSalary.toLocaleString();
-            document.getElementById('empCount').textContent = employees.length > 0? `(${employees.length})` : '';
+            document.getElementById('statTotal').textContent = emps.length;
+            document.getElementById('statWorking').textContent = emps.filter(e => e.clockIn).length;
+            let p = 0; emps.forEach(e => p += e.pendingPay);
+            document.getElementById('statPending').textContent = "Rs. " + p.toFixed(2);
         }
 
-        function renderEmployees() {
-            const employees = getEmployees();
-            const list = document.getElementById('employeeList');
-
-            if (employees.length === 0) {
-                list.innerHTML = '<p style="color: #64748b; text-align: center; padding: 40px 0;">තවම සේවකයින් නෑ. උඩින් Add කරන්න.</p>';
-                updateStats();
-                return;
-            }
-
-            list.innerHTML = employees.map((emp, idx) => `
-                <div class="employee-item">
-                    <div class="employee-info">
-                        <h3>${emp.name}</h3>
-                        <p>Salary: Rs. ${emp.salary.toLocaleString()} ${emp.phone? '| Phone: ' + emp.phone : ''}</p>
-                    </div>
-                    <button class="btn btn-danger" onclick="deleteEmployee(${idx})">Delete</button>
-                </div>
-            `).join('');
-
-            updateStats();
-        }
-
-        function deleteEmployee(index) {
-            if (!confirm('මේ සේවකයව අයින් කරන්නද?')) return;
-
-            const employees = getEmployees();
-            const deletedName = employees[index].name;
-            employees.splice(index, 1);
-            saveEmployees(employees);
-            renderEmployees();
-            showToast(`${deletedName} අයින් කළා`, 'success');
-        }
-
-        document.getElementById('addEmpBtn').addEventListener('click', () => {
-            const name = document.getElementById('empName').value.trim();
-            const salary = parseFloat(document.getElementById('empSalary').value);
-            const phone = document.getElementById('empPhone').value.trim();
-
-            if (!name ||!salary) {
-                showToast('නම සහ Salary අනිවාර්යයි', 'error');
-                return;
-            }
-
-            if (salary <= 0) {
-                showToast('Salary එක 0ට වඩා වැඩි වෙන්න ඕන', 'error');
-                return;
-            }
-
-            const employees = getEmployees();
-            employees.push({
-                name,
-                salary,
-                phone: phone || '',
-                id: Date.now(),
-                createdAt: new Date().toISOString()
-            });
-
-            saveEmployees(employees);
-            renderEmployees();
-
-            document.getElementById('empName').value = '';
-            document.getElementById('empSalary').value = '';
-            document.getElementById('empPhone').value = '';
-            showToast(`${name} add කළා!`, 'success');
-        });
-
-        // Page load වෙනකොට employees load කරන්න
-        renderEmployees();
+        function closeModal() { document.getElementById('modal').classList.remove('active'); }
+        window.onload = render;
     </script>
 </body>
 </html>
