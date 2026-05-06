@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nishitha Loan Management System - Text-Ready v5</title>
+    <title>Nishitha Loan Management System - Multi-Channel v6</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -22,6 +22,7 @@
             --accent-purple: #b388ff;
             --accent-orange: #ff9100;
             --whatsapp-color: #25d366;
+            --sms-color: #ff5722;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -69,6 +70,7 @@
         .btn-secondary-dark { background: #26294a; }
         .btn-whatsapp { background: var(--whatsapp-color); color: #fff; }
         .btn-whatsapp-company { background: #00b0ff; color: #fff; }
+        .btn-sms { background: var(--sms-color); color: #fff; }
         .btn-danger { background: var(--dialog-primary); }
 
         .search-bar-wrapper { display: flex; background-color: #1f223f; border: 1px solid var(--border-color); border-radius: 14px; padding: 4px; margin-bottom: 15px; }
@@ -94,6 +96,7 @@
         .role-badge.guarantor { background: rgba(179, 136, 255, 0.2); color: var(--accent-purple); border-color: var(--accent-purple); }
 
         #profileCaptureContainer { background-color: #111222; border-radius: 16px; padding: 20px; border: 1px solid #2d3161; }
+        .btn-group-row { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -107,9 +110,9 @@
             </div>
         </div>
         <div class="company-config">
-            <label><i class="fab fa-whatsapp"></i> Company WhatsApp Number</label>
+            <label><i class="fab fa-whatsapp"></i> Company Mobile Number (For Admin Reports)</label>
             <div>
-                <input type="text" id="companyWhatsApp" placeholder="e.g. 94771234567">
+                <input type="text" id="companyWhatsApp" placeholder="e.g. 0771234567">
                 <button onclick="saveCompanyNumber()">Save</button>
             </div>
         </div>
@@ -291,9 +294,13 @@
                 </div>
 
                 <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="btn-dialog btn-whatsapp" onclick="shareProfileText('customer')"><i class="fab fa-whatsapp"></i> Text Statement to Cust</button>
-                        <button class="btn-dialog btn-whatsapp-company" onclick="shareProfileText('company')"><i class="fab fa-whatsapp"></i> Text Statement to Comp</button>
+                    <div class="btn-group-row">
+                        <button class="btn-dialog btn-whatsapp" onclick="shareProfileText('customer', 'whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp Statement to Cust</button>
+                        <button class="btn-dialog btn-sms" onclick="shareProfileText('customer', 'sms')"><i class="fas fa-sms"></i> Normal SMS Statement to Cust</button>
+                    </div>
+                    <div class="btn-group-row">
+                        <button class="btn-dialog btn-whatsapp-company" onclick="shareProfileText('company', 'whatsapp')"><i class="fab fa-whatsapp"></i> WhatsApp to Admin</button>
+                        <button class="btn-dialog btn-sms" style="background:#5c6bc0;" onclick="shareProfileText('company', 'sms')"><i class="fas fa-sms"></i> Normal SMS to Admin</button>
                     </div>
                     <button id="deleteActionBtn" class="btn-dialog btn-danger" style="display:none; width: 100%;" onclick="deleteSettledLoan()">Remove Settled Loan</button>
                 </div>
@@ -333,11 +340,16 @@
 
             <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn-dialog btn-primary-grad" style="background: linear-gradient(90deg, #00e676, #00b0ff);" onclick="submitRepayment()">
-                    <i class="fas fa-cash-register"></i> Post Payment (සුරකින්න)
+                    <i class="fas fa-cash-register"></i> Post Payment (සුරකින්ന)
                 </button>
-                <button id="whatsappReceiptBtn" class="btn-dialog btn-whatsapp" style="display: none; width: 100%;" onclick="sendWhatsAppReceipt()">
-                    <i class="fab fa-whatsapp"></i> Send WhatsApp Payment Receipt (පාරිභෝගිකයාට යවන්න)
-                </button>
+                <div id="receiptActionsBox" style="display: none; display: flex; gap: 8px; flex-direction: column; width: 100%;">
+                    <button class="btn-dialog btn-whatsapp" onclick="sendReceipt('whatsapp')">
+                        <i class="fab fa-whatsapp"></i> Send WhatsApp Receipt
+                    </button>
+                    <button class="btn-dialog btn-sms" onclick="sendReceipt('sms')">
+                        <i class="fas fa-sms"></i> Send Normal SMS Receipt
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -367,8 +379,6 @@
     <script>
         let loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
         let activeSelectedLoanIDForDelete = null;
-        
-        // Cache variable for latest transaction to generate receipt quick
         let lastTransactionCache = null;
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -384,7 +394,7 @@
         function saveCompanyNumber() {
             const num = document.getElementById('companyWhatsApp').value.trim();
             localStorage.setItem('company_whatsapp_num', num);
-            alert("ආයතනික WhatsApp අංකය සාර්ථකව සුරැකුණා!");
+            alert("ආයතනික අංකය සාර්ථකව සුරැකුණා!");
         }
 
         function setDefaultDateTime() {
@@ -552,7 +562,7 @@
                 
                 let summaryHTML = "";
                 guaranteedLoans.forEach((l, index) => {
-                    summaryHTML += `• <b>${l.name}</b> (Loan: ${l.loanID}) - Remaining: Rs. ${l.remainingBalance.toFixed(2)} [${l.status}]<br>`;
+                    summaryHTML += `• ${l.name} (Loan: ${l.loanID}) - Remaining: Rs. ${l.remainingBalance.toFixed(2)} [${l.status}]\n`;
                     
                     tbody.innerHTML += `
                         <tr>
@@ -561,7 +571,7 @@
                             <td style="color: var(--success-color); font-weight:600;">Bal: Rs. ${l.remainingBalance.toFixed(2)} (${l.status})</td>
                         </tr>`;
                 });
-                document.getElementById('gLoansList').innerHTML = summaryHTML;
+                document.getElementById('gLoansList').innerText = summaryHTML;
 
             } else {
                 resultArea.style.display = "none";
@@ -598,9 +608,6 @@
             }
         }
 
-        // ==========================================
-        // TEXT-BASED WHATSAPP ENGINE (NO IMAGES)
-        // ==========================================
         function submitRepayment() {
             const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
             const payment = parseFloat(document.getElementById('payAmount').value);
@@ -619,7 +626,6 @@
             if(!loan.history) loan.history = [];
             const nextWeekNo = loan.history.length + 1;
 
-            // Save to DB
             loan.history.push({ weekNo: nextWeekNo, amountPaid: payment, dateTimeString: finalDateTimeString });
             loan.remainingBalance -= payment;
 
@@ -629,7 +635,6 @@
 
             localStorage.setItem('loans_database', JSON.stringify(loansDB));
 
-            // Cache data for instant WhatsApp text receipt
             lastTransactionCache = {
                 loanID: loan.loanID,
                 name: loan.name,
@@ -640,45 +645,48 @@
                 dateTime: finalDateTimeString
             };
 
-            // Reveal the quick WhatsApp Share button
-            document.getElementById('whatsappReceiptBtn').style.display = "block";
+            document.getElementById('receiptActionsBox').style.display = "flex";
             
-            alert(`වාරිකය සාර්ථකව සුරැකුණා!\nපාරිභෝගිකයාට මැසේජ් එක යැවීමට පහළ 'Send WhatsApp Payment Receipt' බටන් එක ඔබන්න.`);
+            alert(`වාරිකය සාර්ථකව සුරැකුණා!\nපාරිභෝගිකයාට ලැබීම් පත්‍රය (Receipt) පහත ඇති බටන් මගින් යවන්න.`);
             
             loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats(); masterSearch();
         }
 
-        function sendWhatsAppReceipt() {
+        function sendReceipt(channel) {
             if (!lastTransactionCache) return alert("පළමුව වාරිකයක් ඇතුළත් කරන්න.");
 
             let phoneNum = lastTransactionCache.phone.trim();
-            if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
-
-            // Construct the instant plain-text message layout
-            const msg = `* Loan System - Receipt*\n` +
+            
+            const msg = `Loan System - Receipt\n` +
                         `-----------------------------------------\n` +
-                        `• *Loan ID:* ${lastTransactionCache.loanID}\n` +
-                        `• *Customer:* ${lastTransactionCache.name}\n` +
-                        `• *Paid Amount:* Rs. ${lastTransactionCache.amountPaid.toFixed(2)}\n` +
-                        `• *Date/Time:* ${lastTransactionCache.dateTime}\n` +
+                        `• Loan ID: ${lastTransactionCache.loanID}\n` +
+                        `• Customer: ${lastTransactionCache.name}\n` +
+                        `• Paid Amount: Rs. ${lastTransactionCache.amountPaid.toFixed(2)}\n` +
+                        `• Date/Time: ${lastTransactionCache.dateTime}\n` +
                         `-----------------------------------------\n` +
-                        `*Remaining Balance: Rs. ${lastTransactionCache.remainingBalance.toFixed(2)}*\n` +
-                        `• *Status:* ${lastTransactionCache.status}\n\n` +
-                        `_මේ වාරිකය දැන් සාර්ථකව ඇතුළත් කරන ලදී._\n` +
-                        `ස්තූතියි!`;
+                        `Remaining Balance: Rs. ${lastTransactionCache.remainingBalance.toFixed(2)}\n` +
+                        `• Status: ${lastTransactionCache.status}\n\n` +
+                        `Thank you!`;
 
-            const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(msg)}`;
-            window.open(whatsappURL, '_blank');
+            if (channel === 'whatsapp') {
+                if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
+                const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(msg)}`;
+                window.open(whatsappURL, '_blank');
+            } else if (channel === 'sms') {
+                // Trigger standard SMS protocol
+                const smsURL = `sms:${phoneNum}?body=${encodeURIComponent(msg)}`;
+                window.open(smsURL, '_self');
+            }
 
-            // Reset view state
+            // Reset Input UI
             document.getElementById('payLoanNo').value = '';
             document.getElementById('payAmount').value = '';
             document.getElementById('payCalcBox').style.display = "none";
-            document.getElementById('whatsappReceiptBtn').style.display = "none";
+            document.getElementById('receiptActionsBox').style.display = "none";
             setDefaultDateTime();
         }
 
-        function shareProfileText(target) {
+        function shareProfileText(target, channel) {
             const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
             if (!query) return alert("පළමුව Profile එකක් Search කර ගන්න.");
 
@@ -692,36 +700,41 @@
             if (target === 'customer') {
                 if (!loan) return alert("පාරිභෝගිකයෙකු තෝරාගෙන නොමැත.");
                 phoneNum = loan.phone.trim();
-                if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
             } else {
                 phoneNum = document.getElementById('companyWhatsApp').value.trim();
-                if (!phoneNum) return alert("කරුණාකර ආයතනික WhatsApp අංකය ඇතුළත් කර Save කර ගන්න.");
+                if (!phoneNum) return alert("කරුණාකර ආයතනික දුරකථන අංකය ඇතුළත් කර Save කර ගන්න.");
             }
 
             let messageText = "";
             if (loan) {
-                messageText = `* Loan Management System*\n` +
+                messageText = `Loan Management System Statement\n` +
                               `-----------------------------------------\n` +
-                              `• *Loan ID:* ${loan.loanID}\n` +
-                              `• *Status:* ${loan.status}\n` +
-                              `• *Customer:* ${loan.name}\n` +
-                              `• *NIC:* ${loan.customerNIC}\n` +
-                              `• *Weekly Due:* Rs. ${loan.weeklyDue.toFixed(2)}\n` +
+                              `• Loan ID: ${loan.loanID}\n` +
+                              `• Status: ${loan.status}\n` +
+                              `• Customer: ${loan.name}\n` +
+                              `• NIC: ${loan.customerNIC}\n` +
+                              `• Weekly Due: Rs. ${loan.weeklyDue.toFixed(2)}\n` +
                               `-----------------------------------------\n` +
-                              `*Remaining Balance: Rs. ${loan.remainingBalance.toFixed(2)}*\n\n` +
+                              `Remaining Balance: Rs. ${loan.remainingBalance.toFixed(2)}\n\n` +
                               `Thank you for banking with us!`;
             } else {
                 const gName = document.getElementById('gResName').innerText;
                 const gNic = document.getElementById('gResNIC').innerText;
-                const textClean = document.getElementById('gLoansList').innerText.replace(/<br>/g, '\n').replace(/<b>/g, '').replace(/<\/b>/g, '');
-                messageText = `*Guarantor Statement Report*\n` +
-                              `• *Guarantor:* ${gName}\n` +
-                              `• *NIC:* ${gNic}\n\n` +
-                              `*Guaranteed Loans Details:*\n${textClean}`;
+                const textClean = document.getElementById('gLoansList').innerText;
+                messageText = `Guarantor Statement Report\n` +
+                              `• Guarantor: ${gName}\n` +
+                              `• NIC: ${gNic}\n\n` +
+                              `Guaranteed Loans Details:\n${textClean}`;
             }
 
-            const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(messageText)}`;
-            window.open(whatsappURL, '_blank');
+            if (channel === 'whatsapp') {
+                if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
+                const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(messageText)}`;
+                window.open(whatsappURL, '_blank');
+            } else if (channel === 'sms') {
+                const smsURL = `sms:${phoneNum}?body=${encodeURIComponent(messageText)}`;
+                window.open(smsURL, '_self');
+            }
         }
 
         function loadMasterLedgerTable() {
@@ -824,3 +837,4 @@
     </script>
 </body>
 </html>
+
