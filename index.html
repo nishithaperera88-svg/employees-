@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nishitha Loan Management System - Pro v4</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --dialog-bg: #0b0c16;
+            --dialog-card: #16182c;
+            --dialog-primary: #e60024;
+            --dialog-gradient: linear-gradient(135deg, #6200ee, #1976d2);
+            --dialog-btn-gradient: linear-gradient(90deg, #ff0055, #e60024);
+            --text-main: #ffffff;
+            --text-muted: #8f94ba;
+            --border-color: #26294a;
+            --success-color: #00e676;
+            --accent-blue: #00b0ff;
+            --accent-purple: #b388ff;
+            --accent-orange: #ff9100;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--dialog-bg); color: var(--text-main); padding: 15px; }
+
+        header {
+            background: var(--dialog-gradient); padding: 20px; border-radius: 16px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        header .brand { display: flex; align-items: center; gap: 12px; }
+        header h1 { font-size: 20px; font-weight: 700; }
+        header p { font-size: 11px; color: rgba(255,255,255,0.7); }
+        
+        .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--dialog-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; }
+        .stat-box i { font-size: 24px; color: var(--accent-blue); background: rgba(0,176,255,0.1); padding: 12px; border-radius: 12px; }
+        .stat-box .stat-val { font-size: 18px; font-weight: 700; color: #fff; margin-top: 4px; }
+        .stat-box .stat-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+        .grid-layout { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 992px) { .grid-layout { grid-template-columns: 1.1fr 1fr; } }
+
+        .dialog-card { background-color: var(--dialog-card); border: 1px solid var(--border-color); border-radius: 20px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); margin-bottom: 20px; }
+        .card-title { font-size: 16px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .input-box { display: flex; flex-direction: column; gap: 6px; }
+        .input-box label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .input-box input, .input-box select { padding: 12px; background-color: #1f223f; border: 1px solid var(--border-color); border-radius: 12px; color: #fff; font-size: 14px; outline: none; }
+        .input-box input:focus { border-color: var(--accent-blue); }
+
+        .actions-flex { display: flex; gap: 10px; }
+        .btn-dialog { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; }
+        .btn-primary-grad { background: var(--dialog-btn-gradient); }
+        .btn-secondary-dark { background: #26294a; }
+        .btn-image-save { background: linear-gradient(90deg, #00e676, #00b0ff); }
+        .btn-danger { background: var(--dialog-primary); }
+
+        .search-bar-wrapper { display: flex; background-color: #1f223f; border: 1px solid var(--border-color); border-radius: 14px; padding: 4px; margin-bottom: 15px; }
+        .search-bar-wrapper input { flex: 1; background: none; border: none; padding: 10px 12px; color: #fff; font-size: 14px; outline: none; }
+
+        .list-container { overflow-y: auto; max-height: 200px; margin-top: 10px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .dialog-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        .dialog-table th { background-color: #1f223f; color: var(--text-muted); padding: 12px; position: sticky; top: 0; }
+        .dialog-table td { padding: 12px; border-bottom: 1px solid #1f223f; background-color: var(--dialog-card); }
+        .dialog-table tbody tr:hover td { background-color: #1e213a; }
+
+        .summary-box { background: #1f223f; padding: 15px; border-radius: 16px; margin-top: 15px; border: 1px solid var(--border-color); }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-muted); }
+        .summary-item span.highlight { color: #fff; font-weight: 600; }
+        .summary-item.grand-total { border-top: 1px dashed var(--border-color); padding-top: 10px; font-size: 18px; font-weight: 700; color: var(--success-color); }
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .badge.active { background: rgba(0, 230, 118, 0.15); color: var(--success-color); }
+        .badge.settled { background: rgba(143, 148, 186, 0.2); color: var(--text-muted); }
+        
+        .role-badge { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; display: inline-block; margin-bottom: 10px; border: 1px solid transparent; }
+        .role-badge.customer { background: rgba(0, 176, 255, 0.2); color: var(--accent-blue); border-color: var(--accent-blue); }
+        .role-badge.guarantor { background: rgba(179, 136, 255, 0.2); color: var(--accent-purple); border-color: var(--accent-purple); }
+
+        #profileCaptureContainer { background-color: #111222; border-radius: 16px; padding: 20px; border: 1px solid #2d3161; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <i class="fas fa-hand-holding-usd"></i>
+            <div>
+                <h1>Nishitha Loan Management System</h1>
+                <p>Enterprise Micro-Finance Dashboard</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-stats">
+        <div class="stat-box">
+            <i class="fas fa-wallet" style="color: var(--accent-blue); background:rgba(0,176,255,0.1);"></i>
+            <div>
+                <div class="stat-lbl">Total Loans Capital Issued</div>
+                <div class="stat-val" id="sysTotalCapital">Rs. 0.00</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-chart-line" style="color: var(--success-color); background:rgba(0,230,118,0.1);"></i>
+            <div>
+                <div class="stat-lbl">Total Expected Return</div>
+                <div class="stat-val" id="sysTotalPayable">Rs. 0.00</div>
+            </div>
+        </div>
+        <div class="stat-box">
+            <i class="fas fa-comment-dollar" style="color: var(--accent-orange); background:rgba(255,145,0,0.1);"></i>
+            <div>
+                <div class="stat-lbl">Total Outstanding (එන්න තියෙන මුදල)</div>
+                <div class="stat-val" id="sysTotalOutstanding" style="color: var(--accent-orange);">Rs. 0.00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dialog-card">
+        <div class="card-title" style="margin-bottom:10px;"><i class="fas fa-calendar-day" style="color:var(--accent-blue)"></i> Today's Installment Collection List (අද දින වාරික)</div>
+        <div class="list-container" style="max-height: 120px;">
+            <table class="dialog-table">
+                <thead>
+                    <tr>
+                        <th>Loan No</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Weekly Due (Rs.)</th>
+                        <th>Balance (Rs.)</th>
+                    </tr>
+                </thead>
+                <tbody id="todayDueTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="grid-layout">
+        
+        <div class="dialog-card">
+            <div class="card-title"><i class="fas fa-user-plus" style="color: var(--dialog-primary);"></i> Issue Loan / Add Running Loan (නව හෝ පවතින ණය ඇතුළත් කිරීම)</div>
+            
+            <div class="form-grid">
+                <div class="input-box">
+                    <label>Customer NIC (Unique)</label>
+                    <input type="text" id="custNIC" placeholder="e.g. 1999XXXXXX">
+                </div>
+                <div class="input-box">
+                    <label>Full Name</label>
+                    <input type="text" id="custName" placeholder="Customer Name">
+                </div>
+                <div class="input-box">
+                    <label>Phone Number</label>
+                    <input type="text" id="custPhone" placeholder="07XXXXXXXX">
+                </div>
+                <div class="input-box">
+                    <label>Home Address</label>
+                    <input type="text" id="custAddress" placeholder="Address">
+                </div>
+                <div class="input-box">
+                    <label>Guarantor NIC</label>
+                    <input type="text" id="guarantorNIC" placeholder="Guarantor NIC">
+                </div>
+                <div class="input-box">
+                    <label>Guarantor Name</label>
+                    <input type="text" id="guarantorName" placeholder="Guarantor Name">
+                </div>
+                <div class="input-box">
+                    <label>Loan Capital (Rs.)</label>
+                    <input type="number" id="loanCapital" placeholder="0.00" oninput="calculateLoanTotal()">
+                </div>
+                <div class="input-box">
+                    <label>Monthly Interest (%)</label>
+                    <input type="number" id="loanInterest" placeholder="e.g. 3" oninput="calculateLoanTotal()">
+                </div>
+                <div class="input-box">
+                    <label>Period (Months)</label>
+                    <input type="number" id="loanPeriod" placeholder="e.g. 3" oninput="calculateLoanTotal()">
+                </div>
+                <div class="input-box">
+                    <label>Collection Day</label>
+                    <select id="collectionDay">
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                </div>
+                <div class="input-box" style="grid-column: span 2; background: #231932; padding: 10px; border-radius: 12px; border: 1px dashed var(--accent-purple);">
+                    <label style="color: var(--accent-purple); font-weight: bold;">Already Paid Amount (දැනට පාරිභෝගිකයා ගෙවා ඇති මුදල)</label>
+                    <input type="number" id="alreadyPaidAmt" placeholder="0.00 (පැරණි ණයක් නම් පමණක් පුරවන්න)" style="background:#130e1c; border-color:var(--accent-purple);">
+                </div>
+            </div>
+
+            <div class="summary-box" style="background: #171932;">
+                <div class="summary-item">
+                    <span>Calculated Weeks</span>
+                    <span id="calcTotalWeeks" class="highlight" style="color: var(--accent-purple);">0 Weeks</span>
+                </div>
+                <div class="summary-item">
+                    <span>Weekly Installment</span>
+                    <span id="calcWeeklyInstallment" class="highlight" style="color: var(--accent-blue);">Rs. 0.00</span>
+                </div>
+                <div class="summary-item grand-total">
+                    <span>Total Payable Amount</span>
+                    <span id="calcTotalPayable">Rs. 0.00</span>
+                </div>
+            </div>
+
+            <div class="actions-flex" style="margin-top: 15px;">
+                <button class="btn-dialog btn-primary-grad" onclick="issueLoan()"><i class="fas fa-check"></i> Save Loan Data</button>
+                <button class="btn-dialog btn-secondary-dark" onclick="resetLoanForm()">Clear</button>
+            </div>
+        </div>
+
+        <div class="dialog-card">
+            <div class="card-title"><i class="fas fa-search" style="color: var(--accent-blue);"></i> Master Search Engine</div>
+            
+            <div class="search-bar-wrapper">
+                <input type="text" id="globalSearchInput" placeholder="Type Name, NIC or Loan ID..." oninput="masterSearch()">
+            </div>
+
+            <div id="searchResultArea" style="display: none; margin-bottom: 20px;">
+                <div id="profileCaptureContainer">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2d3161; padding-bottom: 10px; margin-bottom: 15px;">
+                        <span id="resRoleBadge" class="role-badge">CUSTOMER PROFILE</span>
+                        <span style="font-size: 11px; color: var(--text-muted);" id="photoDateString">Nishitha System</span>
+                    </div>
+
+                    <div id="customerDetailsSection" style="font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+                        <div><strong>Loan ID:</strong> <span id="resLoanNo" style="color:var(--accent-blue); font-weight:bold;"></span></div>
+                        <div><strong>Status:</strong> <span id="resStatus" class="badge"></span></div>
+                        <div><strong>Name:</strong> <span id="resName"></span></div>
+                        <div><strong>NIC:</strong> <span id="resNIC"></span></div>
+                        <div><strong>Phone:</strong> <span id="resPhone"></span></div>
+                        <div><strong>Address:</strong> <span id="resAddress"></span></div>
+                        <div><strong>Guarantor:</strong> <span id="resGuarantor"></span></div>
+                        <div><strong>Guarantor NIC:</strong> <span id="resGuarantorNIC"></span></div>
+                        <div><strong>Weekly Due:</strong> Rs. <span id="resWeekly"></span></div>
+                        <div><strong>Collection Day:</strong> <span id="resCollDay"></span></div>
+                        <div style="grid-column: span 2; color: var(--success-color); font-size: 14px; margin-top: 5px; border-top: 1px dashed #2d3161; padding-top: 8px;">
+                            <strong>Remaining Balance:</strong> Rs. <span id="resBalance"></span>
+                        </div>
+                    </div>
+
+                    <div id="guarantorDetailsSection" style="display:none; font-size: 13px; background: #1a1530; border: 1px solid var(--accent-purple); padding: 12px; border-radius: 12px; margin-bottom: 15px;">
+                        <div style="margin-bottom: 6px;"><strong>Guarantor Name:</strong> <span id="gResName" style="color:var(--accent-purple); font-weight:bold;"></span></div>
+                        <div style="margin-bottom: 10px;"><strong>Guarantor NIC:</strong> <span id="gResNIC"></span></div>
+                        <div style="color: var(--accent-orange); font-weight:600; font-size:12px; border-top:1px solid #3d3161; padding-top:8px;">ඇප වී ඇති පාරිභෝගිකයන්ගේ ලැයිස්තුව:</div>
+                        <div id="gLoansList" style="font-size:11px; color:var(--text-muted); margin-top:5px; line-height:1.5;"></div>
+                    </div>
+
+                    <h5 id="scheduleHeading" style="color: var(--accent-orange); font-size: 12px; margin-bottom: 6px;"><i class="fas fa-list-ol"></i> Installment Receipt Details</h5>
+                    <div class="list-container" style="max-height: 160px; background: #0b0c16;">
+                        <table class="dialog-table" style="font-size: 11px;">
+                            <thead>
+                                <tr>
+                                    <th>Week / Customer</th>
+                                    <th>Installment Amt</th>
+                                    <th>Payment Status / Date-Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div style="margin-top: 15px; display: flex; gap: 10px;">
+                    <button class="btn-dialog btn-image-save" onclick="downloadProfileAsImage()"><i class="fas fa-camera"></i> Save Profile as Image (PNG)</button>
+                    <button id="deleteActionBtn" class="btn-dialog btn-danger" style="display:none; flex: 0.4;" onclick="deleteSettledLoan()">Remove</button>
+                </div>
+            </div>
+
+            <div class="card-title" style="margin-top: 25px;"><i class="fas fa-wallet" style="color: var(--success-color);"></i> Collect Weekly Payment</div>
+            
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr;">
+                <div class="input-box">
+                    <label>Enter Loan Number</label>
+                    <input type="text" id="payLoanNo" placeholder="e.g. LN-1001" oninput="loadRepaymentDetails()">
+                </div>
+                <div class="input-box">
+                    <label>Amount Paid (Rs.)</label>
+                    <input type="number" id="payAmount" placeholder="0.00" oninput="calcNewBalance()">
+                </div>
+                <div class="input-box">
+                    <label><i class="fas fa-edit"></i> Edit Date</label>
+                    <input type="date" id="payCustomDate">
+                </div>
+                <div class="input-box">
+                    <label><i class="fas fa-clock"></i> Edit Time</label>
+                    <input type="time" id="payCustomTime">
+                </div>
+            </div>
+
+            <div class="summary-box" id="payCalcBox" style="display: none; background: #132a24; border-color: #1b4d3e;">
+                <div class="summary-item">
+                    <span>Current Loan Balance:</span>
+                    <span id="payCurrentBalance" style="color: #fff; font-weight:600;">Rs. 0.00</span>
+                </div>
+                <div class="summary-item grand-total" style="color: var(--accent-blue); border-top-color: #1b4d3e;">
+                    <span>New Balance After Payment:</span>
+                    <span id="payNewBalance">Rs. 0.00</span>
+                </div>
+            </div>
+
+            <button class="btn-dialog btn-primary-grad" style="background: linear-gradient(90deg, #00e676, #00b0ff); margin-top: 15px;" onclick="submitRepayment()">
+                <i class="fas fa-cash-register"></i> Post Payment
+            </button>
+        </div>
+
+    </div>
+
+    <div class="dialog-card" style="margin-top: 25px;">
+        <div class="card-title" style="color: var(--accent-purple);"><i class="fas fa-users-cog"></i> Master Ledger - All System Loans List</div>
+        <div class="list-container" style="max-height: 250px;">
+            <table class="dialog-table">
+                <thead>
+                    <tr>
+                        <th>Loan ID</th>
+                        <th>Customer Name</th>
+                        <th>NIC Number</th>
+                        <th>Guarantor Name</th>
+                        <th>Capital (Rs.)</th>
+                        <th>Total Due (Rs.)</th>
+                        <th>Balance (Rs.)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="masterLedgerTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
+        let activeSelectedLoanIDForDelete = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadTodayDues();
+            loadMasterLedgerTable();
+            updateDashboardStats();
+            setDefaultDateTime();
+        });
+
+        function setDefaultDateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('payCustomDate').value = `${year}-${month}-${day}`;
+            document.getElementById('payCustomTime').value = `${hours}-${minutes}`;
+        }
+
+        function updateDashboardStats() {
+            let totalCapital = 0; let totalPayable = 0; let totalOutstanding = 0;
+            loansDB.forEach(loan => {
+                totalCapital += loan.capital;
+                totalPayable += loan.payableAmount;
+                totalOutstanding += loan.remainingBalance;
+            });
+            document.getElementById('sysTotalCapital').innerText = "Rs. " + totalCapital.toFixed(2);
+            document.getElementById('sysTotalPayable').innerText = "Rs. " + totalPayable.toFixed(2);
+            document.getElementById('sysTotalOutstanding').innerText = "Rs. " + totalOutstanding.toFixed(2);
+        }
+
+        function calculateLoanTotal() {
+            const capital = parseFloat(document.getElementById('loanCapital').value) || 0;
+            const interestRate = parseFloat(document.getElementById('loanInterest').value) || 0;
+            const months = parseInt(document.getElementById('loanPeriod').value) || 0;
+
+            const totalWeeks = months * 4; 
+            const totalInterest = capital * (interestRate / 100) * months;
+            const totalPayable = capital + totalInterest;
+            const weeklyInstallment = totalWeeks > 0 ? Math.ceil(totalPayable / totalWeeks) : 0;
+
+            document.getElementById('calcTotalWeeks').innerText = totalWeeks + " Weeks";
+            document.getElementById('calcWeeklyInstallment').innerText = "Rs. " + weeklyInstallment.toFixed(2);
+            document.getElementById('calcTotalPayable').innerText = "Rs. " + totalPayable.toFixed(2);
+        }
+
+        function issueLoan() {
+            const nic = document.getElementById('custNIC').value.trim();
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const gNIC = document.getElementById('guarantorNIC').value.trim();
+            const gName = document.getElementById('guarantorName').value.trim();
+            const capital = parseFloat(document.getElementById('loanCapital').value);
+            const interestRate = parseFloat(document.getElementById('loanInterest').value);
+            const months = parseInt(document.getElementById('loanPeriod').value);
+            const day = document.getElementById('collectionDay').value;
+            const alreadyPaid = parseFloat(document.getElementById('alreadyPaidAmt').value) || 0;
+
+            if (!nic || !name || !phone || !gNIC || !gName || isNaN(capital) || !months) {
+                alert("කරුණාකර සියලු විස්තර නිවැරදිව ඇතුළත් කරන්න.");
+                return;
+            }
+
+            const totalWeeks = months * 4;
+            const totalInterest = capital * (interestRate / 100) * months;
+            const totalPayable = capital + totalInterest;
+            const weeklyInstallment = Math.ceil(totalPayable / totalWeeks);
+            const loanID = "LN-" + (1001 + loansDB.length);
+
+            let remBalance = totalPayable - alreadyPaid;
+            let status = remBalance <= 0 ? "SETTLED" : "ACTIVE";
+            if (remBalance < 0) remBalance = 0;
+
+            let paymentHistory = [];
+            if (alreadyPaid > 0) {
+                let weeksFilled = Math.floor(alreadyPaid / weeklyInstallment);
+                for (let w = 1; w <= weeksFilled; w++) {
+                    paymentHistory.push({ weekNo: w, amountPaid: weeklyInstallment, dateTimeString: "Migrated" });
+                }
+                if (alreadyPaid % weeklyInstallment > 0) {
+                    paymentHistory.push({ weekNo: weeksFilled + 1, amountPaid: alreadyPaid % weeklyInstallment, dateTimeString: "Migrated Partial" });
+                }
+            }
+
+            loansDB.push({
+                loanID, customerNIC: nic, name, phone, address,
+                guarantorNIC: gNIC, guarantorName: gName, capital,
+                payableAmount: totalPayable, remainingBalance: remBalance,
+                weeklyDue: weeklyInstallment, totalWeeks: totalWeeks, collectionDay: day, 
+                status: status, history: paymentHistory
+            });
+
+            localStorage.setItem('loans_database', JSON.stringify(loansDB));
+            alert(`ණය දත්ත සාර්ථකව සුරැකුණා! Loan ID: ${loanID}`);
+            resetLoanForm(); loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats();
+        }
+
+        // ===================================================
+        // DUAL SEARCH SYSTEM: CUSTOMER & GUARANTOR ALIGNMENT
+        // ===================================================
+        function masterSearch() {
+            const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+            const resultArea = document.getElementById('searchResultArea');
+            const deleteBtn = document.getElementById('deleteActionBtn');
+            const badge = document.getElementById('resRoleBadge');
+            
+            const custSection = document.getElementById('customerDetailsSection');
+            const guarSection = document.getElementById('guarantorDetailsSection');
+            const scheduleHeading = document.getElementById('scheduleHeading');
+
+            if (!query) {
+                resultArea.style.display = "none";
+                return;
+            }
+
+            // 1. පාරිභෝගිකයෙක්ද කියා සෙවීම (By Loan ID, Customer NIC, or Customer Name)
+            const loan = loansDB.find(l => 
+                l.loanID.toLowerCase().includes(query) ||
+                l.customerNIC.toLowerCase().includes(query) ||
+                l.name.toLowerCase().includes(query)
+            );
+
+            // 2. ඇපකරුවෙක්ද කියා සෙවීම (By Guarantor NIC or Guarantor Name)
+            const guaranteedLoans = loansDB.filter(l => 
+                l.guarantorNIC.toLowerCase().includes(query) || 
+                l.guarantorName.toLowerCase().includes(query)
+            );
+
+            if (loan) {
+                // Customer කෙනෙක් හමු වූ විට
+                resultArea.style.display = "block";
+                custSection.style.display = "grid";
+                guarSection.style.display = "none";
+                scheduleHeading.style.display = "block";
+                
+                badge.innerText = "CUSTOMER PROFILE";
+                badge.className = "role-badge customer";
+
+                activeSelectedLoanIDForDelete = loan.loanID;
+                document.getElementById('resLoanNo').innerText = loan.loanID;
+                document.getElementById('resName').innerText = loan.name;
+                document.getElementById('resNIC').innerText = loan.customerNIC;
+                document.getElementById('resPhone').innerText = loan.phone;
+                document.getElementById('resAddress').innerText = loan.address;
+                document.getElementById('resGuarantor').innerText = loan.guarantorName;
+                document.getElementById('resGuarantorNIC').innerText = loan.guarantorNIC;
+                document.getElementById('resWeekly').innerText = loan.weeklyDue.toFixed(2);
+                document.getElementById('resCollDay').innerText = loan.collectionDay;
+                document.getElementById('resBalance').innerText = loan.remainingBalance.toFixed(2);
+                document.getElementById('photoDateString').innerText = "Report Date: " + new Date().toLocaleDateString();
+
+                const statusBadge = document.getElementById('resStatus');
+                statusBadge.innerText = loan.status;
+                statusBadge.className = "badge " + (loan.status === "ACTIVE" ? "active" : "settled");
+                deleteBtn.style.display = (loan.status === "SETTLED") ? "block" : "none";
+
+                generateWeeklyScheduleTable(loan);
+
+            } else if (guaranteedLoans.length > 0) {
+                // ඇපකරුවෙක් හමු වූ විට (Guarantor Mode Active)
+                resultArea.style.display = "block";
+                custSection.style.display = "none";
+                guarSection.style.display = "block";
+                scheduleHeading.style.display = "none"; // සති ලැයිස්තුව වෙනුවට ණයකරුවන්ගේ ලැයිස්තුවක් දානවා
+
+                badge.innerText = "GUARANTOR PROFILE";
+                badge.className = "role-badge guarantor";
+                deleteBtn.style.display = "none";
+
+                const firstRecord = guaranteedLoans[0];
+                document.getElementById('gResName').innerText = firstRecord.guarantorName;
+                document.getElementById('gResNIC').innerText = firstRecord.guarantorNIC;
+                document.getElementById('photoDateString').innerText = "Report Date: " + new Date().toLocaleDateString();
+
+                // ඇප වී ඇති අයගේ ලැයිස්තුව ප්‍රධාන වගුවට (Table) ලෝඩ් කිරීම
+                const tbody = document.getElementById('scheduleTableBody');
+                tbody.innerHTML = '';
+                
+                let summaryHTML = "";
+                guaranteedLoans.forEach((l, index) => {
+                    summaryHTML += `• <b>${l.name}</b> (Loan: ${l.loanID}) - Remaining: Rs. ${l.remainingBalance.toFixed(2)} [${l.status}]<br>`;
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><b style="color:var(--accent-blue)">${l.loanID}</b> - ${l.name}</td>
+                            <td>Rs. ${l.weeklyDue.toFixed(2)}</td>
+                            <td style="color: var(--success-color); font-weight:600;">Bal: Rs. ${l.remainingBalance.toFixed(2)} (${l.status})</td>
+                        </tr>`;
+                });
+                document.getElementById('gLoansList').innerHTML = summaryHTML;
+
+            } else {
+                resultArea.style.display = "none";
+            }
+        }
+
+        function generateWeeklyScheduleTable(loan) {
+            const tbody = document.getElementById('scheduleTableBody');
+            tbody.innerHTML = '';
+            
+            let historyMap = {};
+            if(loan.history) {
+                loan.history.forEach(h => { historyMap[h.weekNo] = h.dateTimeString + ` (Rs.${h.amountPaid})`; });
+            }
+
+            const totalPaid = loan.payableAmount - loan.remainingBalance;
+            const weeksPaid = Math.floor(totalPaid / loan.weeklyDue);
+
+            for (let i = 1; i <= loan.totalWeeks; i++) {
+                let dateTimeDisplay = "PENDING"; let statusStyle = "color: var(--text-muted);";
+
+                if (historyMap[i]) {
+                    dateTimeDisplay = historyMap[i]; statusStyle = "color: var(--success-color); font-weight:600;";
+                } else if (i <= weeksPaid) {
+                    dateTimeDisplay = "PAID"; statusStyle = "color: var(--success-color); font-weight:600;";
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>Week ${i}</b></td>
+                        <td>Rs. ${loan.weeklyDue.toFixed(2)}</td>
+                        <td style="${statusStyle}; font-size:10px;">${dateTimeDisplay}</td>
+                    </tr>`;
+            }
+        }
+
+        function submitRepayment() {
+            const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
+            const payment = parseFloat(document.getElementById('payAmount').value);
+            const customDate = document.getElementById('payCustomDate').value;
+            const customTime = document.getElementById('payCustomTime').value;
+
+            if (!loanNo || isNaN(payment) || payment <= 0) {
+                alert("කරුණාකර වලංගු වාරික මුදලක් ඇතුළත් කරන්න.");
+                return;
+            }
+
+            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            if (!loan) return alert("සක්‍රීය ණය අංකයක් සොයාගත නොහැක.");
+
+            const finalDateTimeString = `${customDate} @ ${customTime}`;
+            if(!loan.history) loan.history = [];
+            const nextWeekNo = loan.history.length + 1;
+
+            loan.history.push({ weekNo: nextWeekNo, amountPaid: payment, dateTimeString: finalDateTimeString });
+            loan.remainingBalance -= payment;
+
+            if (loan.remainingBalance <= 0) {
+                loan.remainingBalance = 0; loan.status = "SETTLED";
+                alert("ණය මුදල සම්පූර්ණයෙන්ම ගෙවා අවසන් කරන ලදී!");
+            } else {
+                alert(`වාරිකය ඇතුළත් කළා! වේලාව: ${finalDateTimeString}`);
+            }
+
+            localStorage.setItem('loans_database', JSON.stringify(loansDB));
+            document.getElementById('payLoanNo').value = '';
+            document.getElementById('payAmount').value = '';
+            document.getElementById('payCalcBox').style.display = "none";
+            setDefaultDateTime(); loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats(); masterSearch();
+        }
+
+        function downloadProfileAsImage() {
+            const container = document.getElementById('profileCaptureContainer');
+            const searchInput = document.getElementById('globalSearchInput').value || "Profile";
+            html2canvas(container, { backgroundColor: "#111222", scale: 2 }).then(canvas => {
+                const imageURL = canvas.toDataURL("image/png");
+                const downloadLink = document.createElement('a');
+                downloadLink.href = imageURL;
+                downloadLink.download = `${searchInput}_Report.png`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            });
+        }
+
+        function loadMasterLedgerTable() {
+            const tbody = document.getElementById('masterLedgerTableBody');
+            tbody.innerHTML = '';
+            if (loansDB.length === 0) return;
+            [...loansDB].reverse().forEach(l => {
+                tbody.innerHTML += `
+                    <tr style="cursor:pointer;" onclick="selectLoanFromLedger('${l.loanID}')">
+                        <td><strong style="color:var(--accent-blue)">${l.loanID}</strong></td>
+                        <td><b>${l.name}</b></td>
+                        <td>${l.customerNIC}</td>
+                        <td>${l.guarantorName}</td>
+                        <td>Rs. ${l.capital.toFixed(2)}</td>
+                        <td>Rs. ${l.payableAmount.toFixed(2)}</td>
+                        <td style="color:var(--success-color);">Rs. ${l.remainingBalance.toFixed(2)}</td>
+                        <td><span class="badge ${l.status === 'ACTIVE' ? 'active' : 'settled'}">${l.status}</span></td>
+                    </tr>`;
+            });
+        }
+
+        function selectLoanFromLedger(loanID) {
+            document.getElementById('globalSearchInput').value = loanID;
+            masterSearch();
+            window.scrollTo({ top: document.getElementById('globalSearchInput').offsetTop - 20, behavior: 'smooth' });
+        }
+
+        function loadRepaymentDetails() {
+            const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
+            const payCalcBox = document.getElementById('payCalcBox');
+            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            if (loan) {
+                payCalcBox.style.display = "block";
+                document.getElementById('payCurrentBalance').innerText = "Rs. " + loan.remainingBalance.toFixed(2);
+                calcNewBalance();
+            } else {
+                payCalcBox.style.display = "none";
+            }
+        }
+
+        function calcNewBalance() {
+            const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
+            const payment = parseFloat(document.getElementById('payAmount').value) || 0;
+            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            if (loan) {
+                const newBalance = loan.remainingBalance - payment;
+                document.getElementById('payNewBalance').innerText = "Rs. " + (newBalance >= 0 ? newBalance.toFixed(2) : "0.00");
+            }
+        }
+
+        function loadTodayDues() {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const todayName = days[new Date().getDay()];
+            const tbody = document.getElementById('todayDueTableBody');
+            tbody.innerHTML = '';
+            const todayLoans = loansDB.filter(l => l.collectionDay === todayName && l.status === "ACTIVE");
+            if (todayLoans.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">අද දින වාරික නොමැත.</td></tr>`;
+                return;
+            }
+            todayLoans.forEach(l => {
+                tbody.innerHTML += `
+                    <tr style="cursor:pointer;" onclick="document.getElementById('payLoanNo').value='${l.loanID}'; loadRepaymentDetails();">
+                        <td><strong style="color:var(--accent-blue)">${l.loanID}</strong></td>
+                        <td>${l.name}</td>
+                        <td>${l.phone}</td>
+                        <td><b>${l.weeklyDue.toFixed(2)}</b></td>
+                        <td>Rs. ${l.remainingBalance.toFixed(2)}</td>
+                    </tr>`;
+            });
+        }
+
+        function deleteSettledLoan() {
+            if (!activeSelectedLoanIDForDelete) return;
+            const index = loansDB.findIndex(l => l.loanID === activeSelectedLoanIDForDelete);
+            if (index !== -1 && loansDB[index].status === "SETTLED") {
+                if (confirm("මෙම ගෙවා නිමි ණය දත්ත පද්ධතියෙන් ස්ථිරවම ඉවත් කරන්නද?")) {
+                    loansDB.splice(index, 1);
+                    localStorage.setItem('loans_database', JSON.stringify(loansDB));
+                    document.getElementById('globalSearchInput').value = '';
+                    document.getElementById('searchResultArea').style.display = "none";
+                    loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats();
+                }
+            }
+        }
+
+        function resetLoanForm() {
+            document.getElementById('custNIC').value = '';
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custAddress').value = '';
+            document.getElementById('guarantorNIC').value = '';
+            document.getElementById('guarantorName').value = '';
+            document.getElementById('loanCapital').value = '';
+            document.getElementById('loanInterest').value = '';
+            document.getElementById('loanPeriod').value = '';
+            document.getElementById('alreadyPaidAmt').value = '';
+            calculateLoanTotal();
+        }
+    </script>
+</body>
+</html>
