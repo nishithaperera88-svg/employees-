@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nishitha Loan Management System - Multi-Channel v6</title>
+    <title>Nishitha Loan Management System - Multi-Channel v6 (Firebase Ready)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -106,7 +106,7 @@
             <i class="fas fa-hand-holding-usd"></i>
             <div>
                 <h1>Nishitha Loan Management System</h1>
-                <p>Enterprise Micro-Finance Dashboard</p>
+                <p>Enterprise Micro-Finance Dashboard <span id="syncStatus" style="color:var(--success-color); font-size:10px; margin-left:10px;">(Firebase Connected)</span></p>
             </div>
         </div>
         <div class="company-config">
@@ -340,7 +340,7 @@
 
             <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
                 <button class="btn-dialog btn-primary-grad" style="background: linear-gradient(90deg, #00e676, #00b0ff);" onclick="submitRepayment()">
-                    <i class="fas fa-cash-register"></i> Post Payment (සුරකින්ന)
+                    <i class="fas fa-cash-register"></i> Post Payment (සුරකින්න)
                 </button>
                 <div id="receiptActionsBox" style="display: none; display: flex; gap: 8px; flex-direction: column; width: 100%;">
                     <button class="btn-dialog btn-whatsapp" onclick="sendReceipt('whatsapp')">
@@ -376,21 +376,79 @@
         </div>
     </div>
 
-    <script>
-        let loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
-        let activeSelectedLoanIDForDelete = null;
-        let lastTransactionCache = null;
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        document.addEventListener("DOMContentLoaded", () => {
+        // Firebase Setup Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6B09e5vgN2rwk1A9NorNsU_b1M71Biyk",
+            authDomain: "loan-menagement-system.firebaseapp.com",
+            projectId: "loan-menagement-system",
+            storageBucket: "loan-menagement-system.firebasestorage.app",
+            messagingSenderId: "22968052786",
+            appId: "1:22968052786:web:967691b56b040b3902202b",
+            measurementId: "G-3VVH2DQ2K5",
+            databaseURL: "https://loan-menagement-system-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize App & DB
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const dbRef = ref(database, 'loans_database');
+
+        // Global functions mapped to window object so inline HTML click event listeners can access them
+        window.loansDB = [];
+        window.activeSelectedLoanIDForDelete = null;
+        window.lastTransactionCache = null;
+
+        // Firebase එකෙන් Live Data ලෝඩ් කරගැනීම (Realtime Listener)
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                window.loansDB = data;
+                // LocalStorage එකත් Backup එකක් විදිහට අප්ඩේට් කරනවා
+                localStorage.setItem('loans_database', JSON.stringify(data));
+            } else {
+                // Firebase එක හිස් නම් ලෝකල් එකෙන් ගන්නවා
+                window.loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
+            }
+            document.getElementById('syncStatus').innerText = "(Firebase Synced)";
+            document.getElementById('syncStatus').style.color = "var(--success-color)";
+            
+            // UI ටික රිෆ්‍රෙෂ් කරනවා
             loadTodayDues();
             loadMasterLedgerTable();
             updateDashboardStats();
-            setDefaultDateTime();
-            
-            const savedCompanyNum = localStorage.getItem('company_whatsapp_num') || '';
-            document.getElementById('companyWhatsApp').value = savedCompanyNum;
+        }, (error) => {
+            console.error("Firebase Sync Error: ", error);
+            document.getElementById('syncStatus').innerText = "(Offline Mode)";
+            document.getElementById('syncStatus').style.color = "var(--accent-orange)";
+            // ඉන්ටර්නෙට් නැත්නම් Local Storage එකෙන් වැඩ කරනවා
+            window.loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
+            loadTodayDues();
+            loadMasterLedgerTable();
+            updateDashboardStats();
         });
 
+        // ඩේටා වෙනස් කරපු සැනින් Firebase එකට පුෂ් කරන Common සේව් ෆන්ක්ෂන් එක
+        window.syncToFirebase = function() {
+            set(dbRef, window.loansDB)
+            .then(() => console.log("Data pushed to Cloud Firebase!"))
+            .catch((err) => {
+                console.error("Cloud save failed, local active.", err);
+                localStorage.setItem('loans_database', JSON.stringify(window.loansDB));
+            });
+        };
+
+        // App Initializations 
+        const savedCompanyNum = localStorage.getItem('company_whatsapp_num') || '';
+        document.getElementById('companyWhatsApp').value = savedCompanyNum;
+        setDefaultDateTime();
+
+    </script>
+
+    <script>
         function saveCompanyNumber() {
             const num = document.getElementById('companyWhatsApp').value.trim();
             localStorage.setItem('company_whatsapp_num', num);
@@ -410,7 +468,8 @@
 
         function updateDashboardStats() {
             let totalCapital = 0; let totalPayable = 0; let totalOutstanding = 0;
-            loansDB.forEach(loan => {
+            if(!window.loansDB) return;
+            window.loansDB.forEach(loan => {
                 totalCapital += loan.capital;
                 totalPayable += loan.payableAmount;
                 totalOutstanding += loan.remainingBalance;
@@ -449,7 +508,7 @@
             const alreadyPaid = parseFloat(document.getElementById('alreadyPaidAmt').value) || 0;
 
             if (!nic || !name || !phone || !gNIC || !gName || isNaN(capital) || !months) {
-                alert("කරුණාකර සියලු විස්තර නිවැරදිව ඇතුළත් කරන්න.");
+                alert("කרוණාකර සියලු විස්තර නිවැරදිව ඇතුළත් කරන්න.");
                 return;
             }
 
@@ -457,7 +516,7 @@
             const totalInterest = capital * (interestRate / 100) * months;
             const totalPayable = capital + totalInterest;
             const weeklyInstallment = Math.ceil(totalPayable / totalWeeks);
-            const loanID = "LN-" + (1001 + loansDB.length);
+            const loanID = "LN-" + (1001 + window.loansDB.length);
 
             let remBalance = totalPayable - alreadyPaid;
             let status = remBalance <= 0 ? "SETTLED" : "ACTIVE";
@@ -474,7 +533,7 @@
                 }
             }
 
-            loansDB.push({
+            window.loansDB.push({
                 loanID, customerNIC: nic, name, phone, address,
                 guarantorNIC: gNIC, guarantorName: gName, capital,
                 payableAmount: totalPayable, remainingBalance: remBalance,
@@ -482,9 +541,11 @@
                 status: status, history: paymentHistory
             });
 
-            localStorage.setItem('loans_database', JSON.stringify(loansDB));
+            // Firebase එකට සේව් කරනවා (එය ස්වයංක්‍රීයව UI එක අප්ඩේට් කරයි)
+            if(typeof syncToFirebase === "function") syncToFirebase();
+            
             alert(`ණය දත්ත සාර්ථකව සුරැකුණා! Loan ID: ${loanID}`);
-            resetLoanForm(); loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats();
+            resetLoanForm();
         }
 
         function masterSearch() {
@@ -502,13 +563,13 @@
                 return;
             }
 
-            const loan = loansDB.find(l => 
+            const loan = window.loansDB.find(l => 
                 l.loanID.toLowerCase().includes(query) ||
                 l.customerNIC.toLowerCase().includes(query) ||
                 l.name.toLowerCase().includes(query)
             );
 
-            const guaranteedLoans = loansDB.filter(l => 
+            const guaranteedLoans = window.loansDB.filter(l => 
                 l.guarantorNIC.toLowerCase().includes(query) || 
                 l.guarantorName.toLowerCase().includes(query)
             );
@@ -522,7 +583,7 @@
                 badge.innerText = "CUSTOMER PROFILE";
                 badge.className = "role-badge customer";
 
-                activeSelectedLoanIDForDelete = loan.loanID;
+                window.activeSelectedLoanIDForDelete = loan.loanID;
                 document.getElementById('resLoanNo').innerText = loan.loanID;
                 document.getElementById('resName').innerText = loan.name;
                 document.getElementById('resNIC').innerText = loan.customerNIC;
@@ -619,7 +680,7 @@
                 return;
             }
 
-            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            const loan = window.loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
             if (!loan) return alert("සක්‍රීය ණය අංකයක් සොයාගත නොහැක.");
 
             const finalDateTimeString = `${customDate} @ ${customTime}`;
@@ -633,9 +694,9 @@
                 loan.remainingBalance = 0; loan.status = "SETTLED";
             }
 
-            localStorage.setItem('loans_database', JSON.stringify(loansDB));
+            if(typeof syncToFirebase === "function") syncToFirebase();
 
-            lastTransactionCache = {
+            window.lastTransactionCache = {
                 loanID: loan.loanID,
                 name: loan.name,
                 phone: loan.phone,
@@ -646,26 +707,24 @@
             };
 
             document.getElementById('receiptActionsBox').style.display = "flex";
-            
             alert(`වාරිකය සාර්ථකව සුරැකුණා!\nපාරිභෝගිකයාට ලැබීම් පත්‍රය (Receipt) පහත ඇති බටන් මගින් යවන්න.`);
-            
-            loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats(); masterSearch();
+            masterSearch();
         }
 
         function sendReceipt(channel) {
-            if (!lastTransactionCache) return alert("පළමුව වාරිකයක් ඇතුළත් කරන්න.");
+            if (!window.lastTransactionCache) return alert("පළමුව වාරිකයක් ඇතුළත් කරන්න.");
 
-            let phoneNum = lastTransactionCache.phone.trim();
+            let phoneNum = window.lastTransactionCache.phone.trim();
             
             const msg = `Loan System - Receipt\n` +
                         `-----------------------------------------\n` +
-                        `• Loan ID: ${lastTransactionCache.loanID}\n` +
-                        `• Customer: ${lastTransactionCache.name}\n` +
-                        `• Paid Amount: Rs. ${lastTransactionCache.amountPaid.toFixed(2)}\n` +
-                        `• Date/Time: ${lastTransactionCache.dateTime}\n` +
+                        `• Loan ID: ${window.lastTransactionCache.loanID}\n` +
+                        `• Customer: ${window.lastTransactionCache.name}\n` +
+                        `• Paid Amount: Rs. ${window.lastTransactionCache.amountPaid.toFixed(2)}\n` +
+                        `• Date/Time: ${window.lastTransactionCache.dateTime}\n` +
                         `-----------------------------------------\n` +
-                        `Remaining Balance: Rs. ${lastTransactionCache.remainingBalance.toFixed(2)}\n` +
-                        `• Status: ${lastTransactionCache.status}\n\n` +
+                        `Remaining Balance: Rs. ${window.lastTransactionCache.remainingBalance.toFixed(2)}\n` +
+                        `• Status: ${window.lastTransactionCache.status}\n\n` +
                         `Thank you!`;
 
             if (channel === 'whatsapp') {
@@ -673,7 +732,6 @@
                 const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(msg)}`;
                 window.open(whatsappURL, '_blank');
             } else if (channel === 'sms') {
-                // Trigger standard SMS protocol
                 const smsURL = `sms:${phoneNum}?body=${encodeURIComponent(msg)}`;
                 window.open(smsURL, '_self');
             }
@@ -690,7 +748,7 @@
             const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
             if (!query) return alert("පළමුව Profile එකක් Search කර ගන්න.");
 
-            const loan = loansDB.find(l => 
+            const loan = window.loansDB.find(l => 
                 l.loanID.toLowerCase().includes(query) ||
                 l.customerNIC.toLowerCase().includes(query) ||
                 l.name.toLowerCase().includes(query)
@@ -740,8 +798,8 @@
         function loadMasterLedgerTable() {
             const tbody = document.getElementById('masterLedgerTableBody');
             tbody.innerHTML = '';
-            if (loansDB.length === 0) return;
-            [...loansDB].reverse().forEach(l => {
+            if (!window.loansDB || window.loansDB.length === 0) return;
+            [...window.loansDB].reverse().forEach(l => {
                 tbody.innerHTML += `
                     <tr style="cursor:pointer;" onclick="selectLoanFromLedger('${l.loanID}')">
                         <td><strong style="color:var(--accent-blue)">${l.loanID}</strong></td>
@@ -765,7 +823,7 @@
         function loadRepaymentDetails() {
             const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
             const payCalcBox = document.getElementById('payCalcBox');
-            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            const loan = window.loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
             if (loan) {
                 payCalcBox.style.display = "block";
                 document.getElementById('payCurrentBalance').innerText = "Rs. " + loan.remainingBalance.toFixed(2);
@@ -778,7 +836,7 @@
         function calcNewBalance() {
             const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
             const payment = parseFloat(document.getElementById('payAmount').value) || 0;
-            const loan = loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
+            const loan = window.loansDB.find(l => l.loanID === loanNo && l.status === "ACTIVE");
             if (loan) {
                 const newBalance = loan.remainingBalance - payment;
                 document.getElementById('payNewBalance').innerText = "Rs. " + (newBalance >= 0 ? newBalance.toFixed(2) : "0.00");
@@ -790,7 +848,8 @@
             const todayName = days[new Date().getDay()];
             const tbody = document.getElementById('todayDueTableBody');
             tbody.innerHTML = '';
-            const todayLoans = loansDB.filter(l => l.collectionDay === todayName && l.status === "ACTIVE");
+            if(!window.loansDB) return;
+            const todayLoans = window.loansDB.filter(l => l.collectionDay === todayName && l.status === "ACTIVE");
             if (todayLoans.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted);">අද දින වාරික නොමැත.</td></tr>`;
                 return;
@@ -808,15 +867,14 @@
         }
 
         function deleteSettledLoan() {
-            if (!activeSelectedLoanIDForDelete) return;
-            const index = loansDB.findIndex(l => l.loanID === activeSelectedLoanIDForDelete);
-            if (index !== -1 && loansDB[index].status === "SETTLED") {
+            if (!window.activeSelectedLoanIDForDelete) return;
+            const index = window.loansDB.findIndex(l => l.loanID === window.activeSelectedLoanIDForDelete);
+            if (index !== -1 && window.loansDB[index].status === "SETTLED") {
                 if (confirm("මෙම ගෙවා නිමි ණය දත්ත පද්ධතියෙන් ස්ථිරවම ඉවත් කරන්නද?")) {
-                    loansDB.splice(index, 1);
-                    localStorage.setItem('loans_database', JSON.stringify(loansDB));
+                    window.loansDB.splice(index, 1);
+                    if(typeof syncToFirebase === "function") syncToFirebase();
                     document.getElementById('globalSearchInput').value = '';
                     document.getElementById('searchResultArea').style.display = "none";
-                    loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats();
                 }
             }
         }
