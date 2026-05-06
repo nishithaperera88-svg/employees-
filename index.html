@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nishitha Loan Management System - Pro v4</title>
+    <title>Nishitha Loan Management System - Text-Ready v5</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         :root {
@@ -23,6 +21,7 @@
             --accent-blue: #00b0ff;
             --accent-purple: #b388ff;
             --accent-orange: #ff9100;
+            --whatsapp-color: #25d366;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
@@ -31,12 +30,21 @@
         header {
             background: var(--dialog-gradient); padding: 20px; border-radius: 16px;
             display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3); flex-wrap: wrap; gap: 15px;
         }
         header .brand { display: flex; align-items: center; gap: 12px; }
         header h1 { font-size: 20px; font-weight: 700; }
         header p { font-size: 11px; color: rgba(255,255,255,0.7); }
         
+        .company-config {
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 12px;
+            display: flex; flex-direction: column; gap: 5px; min-width: 220px;
+        }
+        .company-config label { font-size: 11px; font-weight: 600; color: #fff; }
+        .company-config div { display: flex; gap: 5px; }
+        .company-config input { padding: 6px 10px; border-radius: 8px; border: none; background: #fff; color: #000; font-size: 13px; outline: none; flex: 1; }
+        .company-config button { padding: 6px 12px; border-radius: 8px; border: none; background: var(--dialog-bg); color: #fff; font-size: 11px; cursor: pointer; font-weight: bold; }
+
         .dashboard-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: var(--dialog-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; }
         .stat-box i { font-size: 24px; color: var(--accent-blue); background: rgba(0,176,255,0.1); padding: 12px; border-radius: 12px; }
@@ -55,11 +63,12 @@
         .input-box input, .input-box select { padding: 12px; background-color: #1f223f; border: 1px solid var(--border-color); border-radius: 12px; color: #fff; font-size: 14px; outline: none; }
         .input-box input:focus { border-color: var(--accent-blue); }
 
-        .actions-flex { display: flex; gap: 10px; }
-        .btn-dialog { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; }
+        .actions-flex { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-dialog { flex: 1; padding: 12px; border: none; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: #fff; min-width: 120px; }
         .btn-primary-grad { background: var(--dialog-btn-gradient); }
         .btn-secondary-dark { background: #26294a; }
-        .btn-image-save { background: linear-gradient(90deg, #00e676, #00b0ff); }
+        .btn-whatsapp { background: var(--whatsapp-color); color: #fff; }
+        .btn-whatsapp-company { background: #00b0ff; color: #fff; }
         .btn-danger { background: var(--dialog-primary); }
 
         .search-bar-wrapper { display: flex; background-color: #1f223f; border: 1px solid var(--border-color); border-radius: 14px; padding: 4px; margin-bottom: 15px; }
@@ -95,6 +104,13 @@
             <div>
                 <h1>Nishitha Loan Management System</h1>
                 <p>Enterprise Micro-Finance Dashboard</p>
+            </div>
+        </div>
+        <div class="company-config">
+            <label><i class="fab fa-whatsapp"></i> Company WhatsApp Number</label>
+            <div>
+                <input type="text" id="companyWhatsApp" placeholder="e.g. 94771234567">
+                <button onclick="saveCompanyNumber()">Save</button>
             </div>
         </div>
     </header>
@@ -274,9 +290,12 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                    <button class="btn-dialog btn-image-save" onclick="downloadProfileAsImage()"><i class="fas fa-camera"></i> Save Profile as Image (PNG)</button>
-                    <button id="deleteActionBtn" class="btn-dialog btn-danger" style="display:none; flex: 0.4;" onclick="deleteSettledLoan()">Remove</button>
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-dialog btn-whatsapp" onclick="shareProfileText('customer')"><i class="fab fa-whatsapp"></i> Text Statement to Cust</button>
+                        <button class="btn-dialog btn-whatsapp-company" onclick="shareProfileText('company')"><i class="fab fa-whatsapp"></i> Text Statement to Comp</button>
+                    </div>
+                    <button id="deleteActionBtn" class="btn-dialog btn-danger" style="display:none; width: 100%;" onclick="deleteSettledLoan()">Remove Settled Loan</button>
                 </div>
             </div>
 
@@ -312,9 +331,14 @@
                 </div>
             </div>
 
-            <button class="btn-dialog btn-primary-grad" style="background: linear-gradient(90deg, #00e676, #00b0ff); margin-top: 15px;" onclick="submitRepayment()">
-                <i class="fas fa-cash-register"></i> Post Payment
-            </button>
+            <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn-dialog btn-primary-grad" style="background: linear-gradient(90deg, #00e676, #00b0ff);" onclick="submitRepayment()">
+                    <i class="fas fa-cash-register"></i> Post Payment (සුරකින්න)
+                </button>
+                <button id="whatsappReceiptBtn" class="btn-dialog btn-whatsapp" style="display: none; width: 100%;" onclick="sendWhatsAppReceipt()">
+                    <i class="fab fa-whatsapp"></i> Send WhatsApp Payment Receipt (පාරිභෝගිකයාට යවන්න)
+                </button>
+            </div>
         </div>
 
     </div>
@@ -343,13 +367,25 @@
     <script>
         let loansDB = JSON.parse(localStorage.getItem('loans_database')) || [];
         let activeSelectedLoanIDForDelete = null;
+        
+        // Cache variable for latest transaction to generate receipt quick
+        let lastTransactionCache = null;
 
         document.addEventListener("DOMContentLoaded", () => {
             loadTodayDues();
             loadMasterLedgerTable();
             updateDashboardStats();
             setDefaultDateTime();
+            
+            const savedCompanyNum = localStorage.getItem('company_whatsapp_num') || '';
+            document.getElementById('companyWhatsApp').value = savedCompanyNum;
         });
+
+        function saveCompanyNumber() {
+            const num = document.getElementById('companyWhatsApp').value.trim();
+            localStorage.setItem('company_whatsapp_num', num);
+            alert("ආයතනික WhatsApp අංකය සාර්ථකව සුරැකුණා!");
+        }
 
         function setDefaultDateTime() {
             const now = new Date();
@@ -441,9 +477,6 @@
             resetLoanForm(); loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats();
         }
 
-        // ===================================================
-        // DUAL SEARCH SYSTEM: CUSTOMER & GUARANTOR ALIGNMENT
-        // ===================================================
         function masterSearch() {
             const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
             const resultArea = document.getElementById('searchResultArea');
@@ -459,21 +492,18 @@
                 return;
             }
 
-            // 1. පාරිභෝගිකයෙක්ද කියා සෙවීම (By Loan ID, Customer NIC, or Customer Name)
             const loan = loansDB.find(l => 
                 l.loanID.toLowerCase().includes(query) ||
                 l.customerNIC.toLowerCase().includes(query) ||
                 l.name.toLowerCase().includes(query)
             );
 
-            // 2. ඇපකරුවෙක්ද කියා සෙවීම (By Guarantor NIC or Guarantor Name)
             const guaranteedLoans = loansDB.filter(l => 
                 l.guarantorNIC.toLowerCase().includes(query) || 
                 l.guarantorName.toLowerCase().includes(query)
             );
 
             if (loan) {
-                // Customer කෙනෙක් හමු වූ විට
                 resultArea.style.display = "block";
                 custSection.style.display = "grid";
                 guarSection.style.display = "none";
@@ -503,11 +533,10 @@
                 generateWeeklyScheduleTable(loan);
 
             } else if (guaranteedLoans.length > 0) {
-                // ඇපකරුවෙක් හමු වූ විට (Guarantor Mode Active)
                 resultArea.style.display = "block";
                 custSection.style.display = "none";
                 guarSection.style.display = "block";
-                scheduleHeading.style.display = "none"; // සති ලැයිස්තුව වෙනුවට ණයකරුවන්ගේ ලැයිස්තුවක් දානවා
+                scheduleHeading.style.display = "none";
 
                 badge.innerText = "GUARANTOR PROFILE";
                 badge.className = "role-badge guarantor";
@@ -518,7 +547,6 @@
                 document.getElementById('gResNIC').innerText = firstRecord.guarantorNIC;
                 document.getElementById('photoDateString').innerText = "Report Date: " + new Date().toLocaleDateString();
 
-                // ඇප වී ඇති අයගේ ලැයිස්තුව ප්‍රධාන වගුවට (Table) ලෝඩ් කිරීම
                 const tbody = document.getElementById('scheduleTableBody');
                 tbody.innerHTML = '';
                 
@@ -570,6 +598,9 @@
             }
         }
 
+        // ==========================================
+        // TEXT-BASED WHATSAPP ENGINE (NO IMAGES)
+        // ==========================================
         function submitRepayment() {
             const loanNo = document.getElementById('payLoanNo').value.toUpperCase().trim();
             const payment = parseFloat(document.getElementById('payAmount').value);
@@ -588,35 +619,109 @@
             if(!loan.history) loan.history = [];
             const nextWeekNo = loan.history.length + 1;
 
+            // Save to DB
             loan.history.push({ weekNo: nextWeekNo, amountPaid: payment, dateTimeString: finalDateTimeString });
             loan.remainingBalance -= payment;
 
             if (loan.remainingBalance <= 0) {
                 loan.remainingBalance = 0; loan.status = "SETTLED";
-                alert("ණය මුදල සම්පූර්ණයෙන්ම ගෙවා අවසන් කරන ලදී!");
-            } else {
-                alert(`වාරිකය ඇතුළත් කළා! වේලාව: ${finalDateTimeString}`);
             }
 
             localStorage.setItem('loans_database', JSON.stringify(loansDB));
+
+            // Cache data for instant WhatsApp text receipt
+            lastTransactionCache = {
+                loanID: loan.loanID,
+                name: loan.name,
+                phone: loan.phone,
+                amountPaid: payment,
+                remainingBalance: loan.remainingBalance,
+                status: loan.status,
+                dateTime: finalDateTimeString
+            };
+
+            // Reveal the quick WhatsApp Share button
+            document.getElementById('whatsappReceiptBtn').style.display = "block";
+            
+            alert(`වාරිකය සාර්ථකව සුරැකුණා!\nපාරිභෝගිකයාට මැසේජ් එක යැවීමට පහළ 'Send WhatsApp Payment Receipt' බටන් එක ඔබන්න.`);
+            
+            loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats(); masterSearch();
+        }
+
+        function sendWhatsAppReceipt() {
+            if (!lastTransactionCache) return alert("පළමුව වාරිකයක් ඇතුළත් කරන්න.");
+
+            let phoneNum = lastTransactionCache.phone.trim();
+            if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
+
+            // Construct the instant plain-text message layout
+            const msg = `*Nishitha Loan System - Receipt*\n` +
+                        `-----------------------------------------\n` +
+                        `• *Loan ID:* ${lastTransactionCache.loanID}\n` +
+                        `• *Customer:* ${lastTransactionCache.name}\n` +
+                        `• *Paid Amount:* Rs. ${lastTransactionCache.amountPaid.toFixed(2)}\n` +
+                        `• *Date/Time:* ${lastTransactionCache.dateTime}\n` +
+                        `-----------------------------------------\n` +
+                        `*Remaining Balance: Rs. ${lastTransactionCache.remainingBalance.toFixed(2)}*\n` +
+                        `• *Status:* ${lastTransactionCache.status}\n\n` +
+                        `_මේ වාරිකය දැන් සාර්ථකව ඇතුළත් කරන ලදී._\n` +
+                        `ස්තූතියි!`;
+
+            const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(msg)}`;
+            window.open(whatsappURL, '_blank');
+
+            // Reset view state
             document.getElementById('payLoanNo').value = '';
             document.getElementById('payAmount').value = '';
             document.getElementById('payCalcBox').style.display = "none";
-            setDefaultDateTime(); loadTodayDues(); loadMasterLedgerTable(); updateDashboardStats(); masterSearch();
+            document.getElementById('whatsappReceiptBtn').style.display = "none";
+            setDefaultDateTime();
         }
 
-        function downloadProfileAsImage() {
-            const container = document.getElementById('profileCaptureContainer');
-            const searchInput = document.getElementById('globalSearchInput').value || "Profile";
-            html2canvas(container, { backgroundColor: "#111222", scale: 2 }).then(canvas => {
-                const imageURL = canvas.toDataURL("image/png");
-                const downloadLink = document.createElement('a');
-                downloadLink.href = imageURL;
-                downloadLink.download = `${searchInput}_Report.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            });
+        function shareProfileText(target) {
+            const query = document.getElementById('globalSearchInput').value.toLowerCase().trim();
+            if (!query) return alert("පළමුව Profile එකක් Search කර ගන්න.");
+
+            const loan = loansDB.find(l => 
+                l.loanID.toLowerCase().includes(query) ||
+                l.customerNIC.toLowerCase().includes(query) ||
+                l.name.toLowerCase().includes(query)
+            );
+
+            let phoneNum = "";
+            if (target === 'customer') {
+                if (!loan) return alert("පාරිභෝගිකයෙකු තෝරාගෙන නොමැත.");
+                phoneNum = loan.phone.trim();
+                if (phoneNum.startsWith("0")) phoneNum = "94" + phoneNum.substring(1);
+            } else {
+                phoneNum = document.getElementById('companyWhatsApp').value.trim();
+                if (!phoneNum) return alert("කරුණාකර ආයතනික WhatsApp අංකය ඇතුළත් කර Save කර ගන්න.");
+            }
+
+            let messageText = "";
+            if (loan) {
+                messageText = `*Nishitha Loan Management System*\n` +
+                              `-----------------------------------------\n` +
+                              `• *Loan ID:* ${loan.loanID}\n` +
+                              `• *Status:* ${loan.status}\n` +
+                              `• *Customer:* ${loan.name}\n` +
+                              `• *NIC:* ${loan.customerNIC}\n` +
+                              `• *Weekly Due:* Rs. ${loan.weeklyDue.toFixed(2)}\n` +
+                              `-----------------------------------------\n` +
+                              `*Remaining Balance: Rs. ${loan.remainingBalance.toFixed(2)}*\n\n` +
+                              `Thank you for banking with us!`;
+            } else {
+                const gName = document.getElementById('gResName').innerText;
+                const gNic = document.getElementById('gResNIC').innerText;
+                const textClean = document.getElementById('gLoansList').innerText.replace(/<br>/g, '\n').replace(/<b>/g, '').replace(/<\/b>/g, '');
+                messageText = `*Guarantor Statement Report*\n` +
+                              `• *Guarantor:* ${gName}\n` +
+                              `• *NIC:* ${gNic}\n\n` +
+                              `*Guaranteed Loans Details:*\n${textClean}`;
+            }
+
+            const whatsappURL = `https://api.whatsapp.com/send?phone=${phoneNum}&text=${encodeURIComponent(messageText)}`;
+            window.open(whatsappURL, '_blank');
         }
 
         function loadMasterLedgerTable() {
